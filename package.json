@@ -1,0 +1,25 @@
+{
+  "name": "green-hills-prime-whatsapp-agent",
+  "version": "1.0.0",
+  "description": "Green Hills Prime AI Agent with Location & Connectivity Knowledge Module and Admin Dashboard",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "node server/server.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "test": "node server/tests/runTests.js"
+  },
+  "keywords": [
+    "whatsapp-agent",
+    "ai-agent",
+    "green-hills-prime",
+    "location-connectivity",
+    "nimz-zaheerabad"
+  ],
+  "author": "Antigravity AI",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

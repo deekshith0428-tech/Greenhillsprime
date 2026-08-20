@@ -1,0 +1,348 @@
+{
+  "project_location": {
+    "project_name": "Royal Kingdom – Green Hills Prime",
+    "project_address": "2MF3+4M, Gondagaon, Telangana 502286",
+    "village": "Morgi",
+    "project_village": "Morgi",
+    "mandal": "Nagalgidda mandal (Unverified)",
+    "project_mandal": "TO_BE_OFFICIALLY_CONFIRMED",
+    "district": "Sangareddy",
+    "project_district": "Sangareddy",
+    "state": "Telangana",
+    "project_state": "Telangana",
+    "pincode": "502286",
+    "location_verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+    "google_maps_location": "https://maps.app.goo.gl/tjvaVs8RNn8WFLtV8",
+    "latitude": "18.022750",
+    "longitude": "77.654268",
+    "nearest_highway": "NH-65 Corridor",
+    "nearest_town": "Zaheerabad",
+    "nearest_city": "Bidar / Hyderabad",
+    "verification_status": "TO_BE_OFFICIALLY_CONFIRMED"
+  },
+  "nimz_landmark": {
+    "name": "Zaheerabad National Investment & Manufacturing Zone",
+    "short_name": "NIMZ Zaheerabad",
+    "type": "National Investment & Manufacturing Zone",
+    "region": "Zaheerabad / Sangareddy District / Telangana",
+    "status": "Government industrial-development project",
+    "importance": "Major industrial and employment-growth landmark",
+    "distance_km": 25,
+    "nimz_distance_km": 25,
+    "distance_status": "PROJECT_TEAM_PROVIDED",
+    "nimz_distance_status": "PROJECT_TEAM_PROVIDED",
+    "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+    "nimz_distance_source": "Project Team Provided (Approximate)",
+    "approved_for_customer": false,
+    "customer_explanation": "The Zaheerabad NIMZ is an important industrial-development project in the region and is one of the surrounding development factors buyers may consider when evaluating the location.",
+    "disclaimer": "Future property appreciation, guaranteed returns, land value doubling, or resale profits cannot be guaranteed."
+  },
+  "nearby_locations": [
+    {
+      "id": "loc_bidar",
+      "name": "Bidar",
+      "type": "Nearby City",
+      "distance_km": 22,
+      "distance_type": "Approximate",
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "source": "Project Team Provided",
+      "verified": false,
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true,
+      "last_verified": "2026-08-20",
+      "notes": "Approx 22 km. Major city with airport and railway connectivity."
+    },
+    {
+      "id": "loc_narayankhed",
+      "name": "Narayankhed",
+      "type": "Nearby Regional Town",
+      "distance_km": 12,
+      "distance_type": "Approximate",
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "source": "Project Team Provided",
+      "verified": false,
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true,
+      "last_verified": "2026-08-20",
+      "notes": "Approx 12 km. Regional commercial town."
+    },
+    {
+      "id": "loc_municipality",
+      "name": "Nearby Municipality",
+      "type": "Municipal Town",
+      "distance_km": 12,
+      "distance_type": "Approximate",
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "source": "Project Team Provided",
+      "verified": false,
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true,
+      "last_verified": "2026-08-20",
+      "notes": "Approx 12 km. Exact municipality name to be officially confirmed."
+    },
+    {
+      "id": "loc_nimz",
+      "name": "Zaheerabad NIMZ",
+      "type": "National Investment & Manufacturing Zone",
+      "distance_km": 25,
+      "distance_type": "Approximate",
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "source": "Project Team Provided",
+      "verified": false,
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true,
+      "last_verified": "2026-08-20",
+      "notes": "Approx 25 km. Key industrial landmark."
+    },
+    {
+      "id": "loc_zaheerabad",
+      "name": "Zaheerabad Town",
+      "type": "Major Nearby Town",
+      "distance_km": 15,
+      "distance_type": "Approximate",
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "source": "Project Team Provided",
+      "verified": false,
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true,
+      "last_verified": "2026-08-20",
+      "notes": "Regional commercial town center (distinct from industrial NIMZ zone)."
+    },
+    {
+      "id": "loc_hyderabad",
+      "name": "Hyderabad",
+      "type": "State Capital",
+      "distance_km": 110,
+      "distance_type": "Approximate",
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "source": "Project Team Provided",
+      "verified": false,
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true,
+      "last_verified": "2026-08-20",
+      "notes": "Connected via NH-65 highway corridor."
+    }
+  ],
+  "development_ecosystem": [
+    {
+      "id": "dev_nimz",
+      "name": "Zaheerabad NIMZ Industrial Project",
+      "category": "NIMZ",
+      "status": "UNDER_DEVELOPMENT",
+      "description": "Government-backed National Investment & Manufacturing Zone targeting manufacturing and employment.",
+      "approved_for_customer": true
+    },
+    {
+      "id": "dev_auto_hub",
+      "name": "Zaheerabad Manufacturing & Auto Zone",
+      "category": "Industrial development",
+      "status": "CURRENT",
+      "description": "Existing industrial manufacturing presence in the wider regional corridor.",
+      "approved_for_customer": true
+    },
+    {
+      "id": "dev_nh65_expand",
+      "name": "NH-65 Highway Connectivity Upgrade",
+      "category": "Road connectivity",
+      "status": "UNDER_DEVELOPMENT",
+      "description": "Infrastructure upgrades along the primary regional highway corridor.",
+      "approved_for_customer": true
+    },
+    {
+      "id": "dev_rail_link",
+      "name": "Regional Railway Feeder Links",
+      "category": "Railway connectivity",
+      "status": "PROPOSED",
+      "description": "Proposed enhancements to regional rail freight and passenger links.",
+      "approved_for_customer": true
+    }
+  ],
+  "land_development": {
+    "claim": "Fully developed land",
+    "source": "Project Team Provided",
+    "verification_status": "PROJECT_TEAM_PROVIDED",
+    "approved_for_customer": true,
+    "disclaimer": "Do NOT interpret as meaning every road, utility, approval, or legal process is completed or every plot operational. Individual feature completion should be verified with the sales team."
+  },
+  "plot_categories": [
+    {
+      "id": "cat_residential",
+      "name": "Residential Plots",
+      "plot_category": "Residential",
+      "category_description": "Plots designated for residential home construction.",
+      "legal_status": "PROJECT_TEAM_PROVIDED",
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true
+    },
+    {
+      "id": "cat_commercial",
+      "name": "Commercial Land",
+      "plot_category": "Commercial",
+      "category_description": "Plots designated for commercial enterprise.",
+      "legal_status": "PROJECT_TEAM_PROVIDED",
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true
+    },
+    {
+      "id": "cat_semi_commercial",
+      "name": "Semi-Commercial Plots",
+      "plot_category": "Semi-Commercial",
+      "category_description": "Plots designated for mixed residential and semi-commercial use.",
+      "legal_status": "PROJECT_TEAM_PROVIDED",
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true
+    },
+    {
+      "id": "cat_under_reg",
+      "name": "Under Registration Plots",
+      "plot_category": "Under Registration",
+      "category_description": "Plots currently undergoing registration processes.",
+      "legal_status": "IN_PROGRESS",
+      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "approved_for_customer": true
+    }
+  ],
+  "registration_info": {
+    "spot_registration_available": true,
+    "spot_registration_wording": "Spot registration is available, subject to the applicable registration and project requirements.",
+    "registration_amount": 200000,
+    "registration_amount_type": "UNCLARIFIED_PROJECT_TEAM_CLAIM",
+    "registration_description": "The project team mentioned ₹2 lakh in connection with registration. This figure MUST NOT be stated as fixed registration fee, stamp duty, or total price. Sales team clarify exact breakdown.",
+    "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+    "patta_passbook_claim": true,
+    "patta_passbook_wording": "The project team has provided information regarding Patta and Passbook. Our sales team can confirm the applicable documentation for the specific plot.",
+    "patta_passbook_status": "PROJECT_TEAM_PROVIDED",
+    "rythu_bandhu_claim": true,
+    "rythu_bandhu_wording": "The project team has indicated information regarding Rythu Bandhu. Eligibility is subject to applicable government rules and the individual's land and documentation status.",
+    "rythu_bandhu_status": "PROJECT_TEAM_PROVIDED",
+    "rythu_bima_claim": true,
+    "rythu_bima_wording": "The project team has provided information regarding Rythu Bima. Applicable eligibility depends on the relevant government rules and documentation.",
+    "rythu_bima_status": "PROJECT_TEAM_PROVIDED"
+  },
+  "land_and_government_scheme_guardrail": {
+    "name": "LAND_AND_GOVERNMENT_SCHEME_GUARDRAIL",
+    "covered_topics": [
+      "Registration",
+      "Stamp duty",
+      "Patta",
+      "Passbook",
+      "Rythu Bandhu",
+      "Rythu Bima",
+      "Land classification",
+      "Commercial classification",
+      "Semi-commercial classification",
+      "Ownership",
+      "Title",
+      "Legal approvals"
+    ],
+    "fallback_message": "I can provide the project information available to me, but for legal or documentation confirmation, I'll connect you with our sales team."
+  },
+  "pickup_policy": {
+    "free_site_visit": true,
+    "company_vehicle_available": true,
+    "pickup_locations": [
+      "Hyderabad",
+      "Sangareddy",
+      "Zaheerabad",
+      "Bidar",
+      "Local Transit Hubs"
+    ],
+    "transportation_notes": "Free site visit with company vehicle is subject to schedule availability and location coordination."
+  },
+  "highway_connectivity": [
+    {
+      "id": "hw_nh65",
+      "name": "NH-65",
+      "full_name": "National Highway 65 (Hyderabad - Pune - Mumbai)",
+      "relationship": "Regional Corridor Connection",
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "approved_for_customer": true,
+      "notes": "Major national highway corridor."
+    },
+    {
+      "id": "hw_sh14",
+      "name": "SH-14",
+      "full_name": "State Highway 14",
+      "relationship": "Regional Arterial Link",
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "approved_for_customer": true,
+      "notes": "State highway road connection."
+    }
+  ],
+  "railway_connectivity": [
+    {
+      "id": "rw_metalkunta",
+      "name": "Metalkunta Railway Station",
+      "distance_km": 10,
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "approved_for_customer": true,
+      "source": "Project Team Provided"
+    },
+    {
+      "id": "rw_zaheerabad",
+      "name": "Zaheerabad Railway Station",
+      "distance_km": 15,
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "approved_for_customer": true,
+      "source": "Project Team Provided"
+    },
+    {
+      "id": "rw_bidar",
+      "name": "Bidar Railway Station",
+      "distance_km": 22,
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "approved_for_customer": true,
+      "source": "Project Team Provided"
+    }
+  ],
+  "airport_connectivity": [
+    {
+      "id": "ap_bidar",
+      "name": "Bidar Airport",
+      "distance_km": 24,
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "approved_for_customer": true,
+      "source": "Project Team Provided"
+    },
+    {
+      "id": "ap_hyderabad",
+      "name": "Rajiv Gandhi International Airport, Hyderabad",
+      "distance_km": 115,
+      "distance_status": "PROJECT_TEAM_PROVIDED",
+      "approved_for_customer": true,
+      "source": "Project Team Provided"
+    }
+  ],
+  "verification_checklist": [
+    { "id": "vc_1", "item": "Exact project village", "status": "PENDING_OFFICIAL_CONFIRMATION" },
+    { "id": "vc_2", "item": "Exact project mandal", "status": "PENDING_OFFICIAL_CONFIRMATION", "note": "Do not state Nagalagidda unless confirmed" },
+    { "id": "vc_3", "item": "Exact municipality name", "status": "PENDING_OFFICIAL_CONFIRMATION" },
+    { "id": "vc_4", "item": "Bidar distance (22 km)", "status": "PROJECT_TEAM_PROVIDED" },
+    { "id": "vc_5", "item": "Narayankhed distance (12 km)", "status": "PROJECT_TEAM_PROVIDED" },
+    { "id": "vc_6", "item": "Municipality distance (12 km)", "status": "PROJECT_TEAM_PROVIDED" },
+    { "id": "vc_7", "item": "NIMZ distance (25 km)", "status": "PROJECT_TEAM_PROVIDED" },
+    { "id": "vc_8", "item": "Meaning of ₹2 lakh registration information", "status": "PENDING_OFFICIAL_CONFIRMATION" },
+    { "id": "vc_9", "item": "Commercial legal classification", "status": "PENDING_OFFICIAL_CONFIRMATION" },
+    { "id": "vc_10", "item": "Semi-commercial legal classification", "status": "PENDING_OFFICIAL_CONFIRMATION" },
+    { "id": "vc_11", "item": "Patta/Passbook documentation", "status": "PROJECT_TEAM_PROVIDED" },
+    { "id": "vc_12", "item": "Rythu Bandhu eligibility", "status": "PROJECT_TEAM_PROVIDED" },
+    { "id": "vc_13", "item": "Rythu Bima eligibility", "status": "PROJECT_TEAM_PROVIDED" },
+    { "id": "vc_14", "item": "Exact registration procedure & Govt charges", "status": "PENDING_OFFICIAL_CONFIRMATION" },
+    { "id": "vc_15", "item": "Google Maps location & GPS coordinates", "status": "PENDING_OFFICIAL_CONFIRMATION" },
+    { "id": "vc_16", "item": "Vehicle pickup policy & areas covered", "status": "PROJECT_TEAM_PROVIDED" }
+  ],
+  "source_control": {
+    "verified_by": "Project Management Team",
+    "verification_date": "2026-08-20",
+    "status": "ACTIVE_GUARDRAILS_ENABLED",
+    "audit_log": [
+      {
+        "id": "audit_init",
+        "timestamp": "2026-08-20T19:38:00Z",
+        "action": "KNOWLEDGE_BASE_EXPANDED",
+        "user": "System Admin",
+        "details": "Expanded Green Hills Prime Knowledge Base with Land, Registration, Development, and Guardrails."
+      }
+    ]
+  }
+}

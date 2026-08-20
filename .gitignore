@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+.pnp
+.pnp.js
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Database files
+*.sqlite
+*.sqlite-journal
+*.db
+server/data/*.sqlite
+server/data/*.db
+
+# Build outputs
+dist/
+build/
+client/dist/
+client/build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS / Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
