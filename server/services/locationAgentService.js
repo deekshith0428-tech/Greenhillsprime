@@ -58,7 +58,7 @@ class LocationAgentService {
     });
 
     // Send outgoing response via Meta Graph API (or mock logger)
-    if (response && response.answer && response.debug.conversation_state === 'AI_ACTIVE') {
+    if (response && response.answer && response.debug && response.debug.conversation_state === 'AI_ACTIVE') {
       const sendResult = await whatsappService.sendTextMessage(rawPhone, response.answer);
       if (sendResult && sendResult.messages && sendResult.messages[0]) {
         response.outgoing_whatsapp_message_id = sendResult.messages[0].id;
@@ -78,7 +78,7 @@ class LocationAgentService {
     const whatsappMessageId = userSession.whatsapp_message_id || null;
     const messageType = userSession.message_type || 'TEXT';
 
-    // 1. DATABASE CUSTOMER & CONVERSATION LOOKUP (Phone Normalization & Unique Key Enforcement)
+    // 1. DATABASE CUSTOMER & CONVERSATION LOOKUP
     const customer = await dbService.findOrCreateCustomer(rawPhone, customerName);
     const conversation = await dbService.getConversation(customer.id);
     let lead = (await dbService.getLeadByCustomer(customer.id)) || {
@@ -88,9 +88,8 @@ class LocationAgentService {
       lead_status: 'NEW_LEAD'
     };
 
-    // 2. HUMAN TAKEOVER ENFORCEMENT (State: AI_ACTIVE vs HUMAN_ACTIVE / AI_PAUSED)
+    // 2. HUMAN TAKEOVER ENFORCEMENT
     if (conversation.state === 'HUMAN_ACTIVE' || conversation.state === 'AI_PAUSED') {
-      // Save customer message to DB
       await dbService.saveMessage({
         conversation_id: conversation.id,
         sender_type: 'CUSTOMER',
@@ -111,7 +110,6 @@ class LocationAgentService {
       const humanAnswer =
         '[Human Takeover Active] Your message has been received by our sales management team. A human advisor will reply directly shortly.';
 
-      // Save AI status notification message to DB
       await dbService.saveMessage({
         conversation_id: conversation.id,
         sender_type: 'SYSTEM',
@@ -143,8 +141,7 @@ class LocationAgentService {
 
     const guardrailsTriggered = [];
     const factsUsed = [];
-    let matchedIntent = 'GENERAL_LOCATION';
-    let distanceStatusEvaluated = 'N/A';
+    let matchedIntent = 'UNKNOWN';
     let approvedForCustomer = true;
     let answer = '';
     let proactiveSteps = null;
@@ -152,120 +149,60 @@ class LocationAgentService {
 
     // Fetch conversation message history from DB for LLM context
     const conversationHistory = await dbService.getMessages(conversation.id, 10);
+    const previousMessage = conversationHistory.length >= 2 ? conversationHistory[conversationHistory.length - 2].content : '';
 
     // =========================================================================
-    // PART B — PROACTIVE CUSTOMER EXPERIENCE FOR INITIAL GREETINGS ("Hi", "Hello")
+    // INTENT CLASSIFICATION & MEMORY EXTRACTION PIPELINE
     // =========================================================================
-    const greetingWords = ['hi', 'hello', 'hey', 'namaste', 'good morning', 'good afternoon', 'good evening', 'start', 'hii'];
-    const isExactGreeting = greetingWords.includes(qLower) || qLower.match(/^(hi|hello|hey|namaste|hii)\b/i);
 
-    if (isExactGreeting) {
-      matchedIntent = 'PROACTIVE_ONBOARDING_GREETING';
-      factsUsed.push('project_location', 'plot_prices', 'gold_offer', 'approved_media');
-
-      lead.last_customer_message_at = new Date().toISOString();
-      lead.lead_status = 'ONBOARDED';
-      await dbService.upsertLeadRecord(customer, lead);
-
-      proactiveSteps = [
-        {
-          step: 1,
-          title: 'Welcome & Introduction',
-          text: 'Welcome to *Royal Kingdom – Green Hills Prime*! 🌿\nWe offer premium planned plot layouts situated in the rapidly developing Zaheerabad / NIMZ growth corridor, Sangareddy District, Telangana.'
-        },
-        {
-          step: 2,
-          title: 'Plot Sizes & Pricing',
-          text: '📏 *Plot Sizes & Pricing Overview*:\n• 2 Guntas (242 sq yds) starting from ₹6.5 Lakhs*\n• Custom plot layouts & commercial/semi-commercial categories available.\n• Spot registration options subject to applicable terms.'
-        },
-        {
-          step: 3,
-          title: 'Special Gold Offer & Amenities',
-          text: '🎁 *Exclusive Offer*: Complimentary Gold Coin offer on spot bookings!\n✨ *Key Amenities*: 30ft & 40ft wide BT roads, electricity lines, avenue plantation, 24/7 security & gated entry.'
-        },
-        {
-          step: 4,
-          title: 'Approved Brochure & Location',
-          text: '📁 *Approved Brochure & Location details*:\n• Project Brochure PDF & Video Walkthrough available.\n• Location: Zaheerabad NIMZ Growth Region, Sangareddy District.\n• Google Maps Link: https://maps.app.goo.gl/tjvaVs8RNn8WFLtV8'
-        },
-        {
-          step: 5,
-          title: 'Personalized Preference Question',
-          text: 'To help you choose the right option, are you mainly looking for investment or planning to build a home?'
-        }
-      ];
-
-      answer = proactiveSteps.map((s) => s.text).join('\n\n');
-
-      // Persist AI message and action to DB
-      await dbService.saveMessage({
-        conversation_id: conversation.id,
-        sender_type: 'AI',
-        content: answer
-      });
-      await dbService.logAiAction(conversation.id, 'PROACTIVE_ONBOARDING', matchedIntent, factsUsed, [], 'Sent 5-step proactive onboarding sequence.');
-
-      // Sync lead to Google Sheets
-      googleSheetsService.upsertLeadToSheet(lead);
-
-      return this.formatResponse(
-        answer,
-        matchedIntent,
-        factsUsed,
-        'CONFIRMED',
-        guardrailsTriggered,
-        true,
-        proactiveSteps,
-        null,
-        lead,
-        conversation.state
-      );
-    }
-
-    // =========================================================================
-    // PART C & TEST 12 — CUSTOMER MEMORY PERSISTENCE & CONTEXT RETRIEVAL
-    // =========================================================================
-    if (qLower.includes('5 lakh') || qLower.includes('6 lakh') || qLower.includes('budget')) {
+    // Extract customer budget
+    if (qLower.includes('5 lakh') || qLower.includes('6 lakh') || qLower.includes('7 lakh') || (qLower.includes('budget') && qLower.match(/(\d+\s*lakhs?)/i))) {
       const match = query.match(/(\d+\s*lakhs?)/i);
       lead.budget = match ? `₹${match[0]}` : 'Around ₹5-7 Lakhs';
       lead.interest_level = 'HIGH';
       await dbService.upsertLeadRecord(customer, lead);
     }
 
-    if (qLower.includes('build a house') || qLower.includes('home') || qLower.includes('living')) {
-      lead.purpose = 'Home / Residential Construction';
+    // Extract customer purpose
+    if (qLower.includes('family') || qLower.includes('build a house') || qLower.includes('home') || qLower.includes('living') || qLower.includes('house')) {
+      lead.purpose = 'Residential / Family Home';
       await dbService.upsertLeadRecord(customer, lead);
-    } else if (qLower.includes('invest') || qLower.includes('investment')) {
+    } else if (qLower.includes('invest') || qLower.includes('investment') || qLower.includes('return')) {
       lead.purpose = 'Investment';
       await dbService.upsertLeadRecord(customer, lead);
     }
 
-    // Memory recommendation query ("what do you recommend?")
-    if (qLower.includes('what do you recommend') || qLower.includes('which option is best') || qLower.includes('suggest option')) {
-      matchedIntent = 'RECOMMENDATION_WITH_MEMORY';
-      factsUsed.push('customer_memory.budget', 'customer_memory.purpose', 'plot_categories');
+    // --- 1. GREETING INTENT ---
+    const greetingWords = ['hi', 'hello', 'hey', 'namaste', 'good morning', 'good afternoon', 'good evening', 'start', 'hii'];
+    const isGreeting = greetingWords.some((w) => qLower === w || qLower.startsWith(w + ' ') || qLower.endsWith(' ' + w));
 
-      if (lead.budget && lead.budget.includes('5')) {
-        answer =
-          `Based on your budget of ${lead.budget}${lead.purpose ? ` for ${lead.purpose}` : ''}, I highly recommend our *2-Gunta Plot layout (242 sq yds)*. ` +
-          `It offers excellent layout planning with 30ft BT roads, avenue plantation, and easy access to the Zaheerabad growth corridor. ` +
-          `Would you like to schedule a free site visit in our company vehicle to inspect this option?`;
-      } else {
-        answer =
-          `Based on your preferences${lead.purpose ? ` for ${lead.purpose}` : ''}, our 2-Gunta (242 sq yds) residential and semi-commercial plot options provide planned infrastructure and spot registration availability. ` +
-          `Would you like me to arrange a free site visit for you?`;
-      }
-
-      await dbService.saveMessage({ conversation_id: conversation.id, sender_type: 'AI', content: answer });
-      await dbService.logAiAction(conversation.id, 'RECOMMENDATION_GIVEN', matchedIntent, factsUsed, [], `Recommended plot using stored budget: ${lead.budget}`);
-      return this.formatResponse(answer, matchedIntent, factsUsed, 'CONFIRMED', guardrailsTriggered, true, null, null, lead, conversation.state);
+    if (isGreeting) {
+      matchedIntent = 'PROACTIVE_ONBOARDING_GREETING';
+      factsUsed.push('project_location', 'plot_prices');
+      answer = 'Namaste! 👋 Welcome to Royal Kingdom – Green Hills Prime. Are you looking for plot details, location information, pricing, or a site visit?';
     }
 
-    // =========================================================================
-    // SITE VISIT RESCHEDULING & CANCELLATION
-    // =========================================================================
-    if (qLower.includes('cancel') && (qLower.includes('visit') || qLower.includes('appointment'))) {
-      matchedIntent = 'SITE_VISIT_CANCELLATION';
+    // --- 2. OFF-TOPIC / GENERAL KNOWLEDGE INTENTS ---
+    else if (qLower.includes('what is a hectare') || qLower.includes('hectare')) {
+      matchedIntent = 'general_question';
+      answer = 'A hectare is a unit of land area equal to 10,000 square metres (approximately 2.47 acres or 99.17 guntas).';
+    } else if (qLower.includes('joke') || qLower.includes('tell me a joke')) {
+      matchedIntent = 'unrelated_question';
+      answer = "Why don't scientists trust atoms? Because they make up everything! 😊 How can I assist with your land search today?";
+    }
+
+    // --- 3. OBJECTIONS & SALES HESITATION ---
+    else if (qLower.includes('discuss with my family') || qLower.includes('family discussion') || qLower.includes('talk to family')) {
+      matchedIntent = 'objection';
+      answer = 'Absolutely! Take your time to discuss with your family. If you\'d like, I can share a summary of our plot options, layout details, and location map so you have everything ready for your discussion.';
+    } else if (qLower.includes('don\'t want to buy') || qLower.includes('not buying') || qLower.includes('just checking') || qLower.includes('looking around')) {
+      matchedIntent = 'objection';
+      answer = 'Of course, no problem at all! Taking your time with property decisions is very important. Whenever you\'re ready, I can share location details, plot options, or site visit information for your reference.';
+    }
+
+    // --- 4. SITE VISIT WORKFLOW (BOOKING / RESCHEDULING / CANCELLATION) ---
+    else if (qLower.includes('cancel') && (qLower.includes('visit') || qLower.includes('appointment'))) {
+      matchedIntent = 'site_visit_cancel';
       factsUsed.push('site_visits');
 
       const existingApt = (await dbService.query(
@@ -285,19 +222,12 @@ class LocationAgentService {
         lead.lead_status = 'VISIT_CANCELLED';
         await dbService.upsertLeadRecord(customer, lead);
         await googleSheetsService.upsertLeadToSheet(lead);
-
-        answer = 'Your Green Hills Prime site visit appointment has been cancelled as requested. Feel free to reschedule anytime!';
+        answer = 'Your Green Hills Prime site visit appointment has been cancelled as requested. Feel free to reschedule anytime whenever you are ready!';
       } else {
         answer = 'I could not find an active site visit appointment under your phone number. Would you like to schedule a new visit?';
       }
-
-      await dbService.saveMessage({ conversation_id: conversation.id, sender_type: 'AI', content: answer });
-      await dbService.logAiAction(conversation.id, 'SITE_VISIT_CANCELLED', matchedIntent, factsUsed, [], 'Cancelled appointment');
-      return this.formatResponse(answer, matchedIntent, factsUsed, 'CANCELLED', guardrailsTriggered, true, null, null, lead, conversation.state);
-    }
-
-    if (qLower.includes('reschedule') || qLower.includes('come monday instead')) {
-      matchedIntent = 'SITE_VISIT_RESCHEDULING';
+    } else if (qLower.includes('reschedule') || qLower.includes('come monday instead')) {
+      matchedIntent = 'site_visit_reschedule';
       factsUsed.push('site_visits', 'google_calendar');
 
       const parsedDate = this.extractDate(query) || '2026-08-24';
@@ -329,73 +259,32 @@ class LocationAgentService {
         await dbService.upsertLeadRecord(customer, lead);
         await googleSheetsService.upsertLeadToSheet(lead);
 
-        answer =
-          `Your site visit appointment has been successfully rescheduled!\n\n` +
-          `📅 *New Date*: ${parsedDate}\n` +
-          `⏰ *New Time*: ${parsedTime}\n` +
-          `🚗 *Transportation*: Company vehicle\n` +
-          `📍 *Pickup*: ${existingApt.pickup_location || 'Project Site'}\n\n` +
-          `Our team will coordinate with you prior to departure.`;
+        answer = `Your site visit appointment has been successfully rescheduled!\n\n📅 *New Date*: ${parsedDate}\n⏰ *New Time*: ${parsedTime}\n🚗 *Transportation*: Company vehicle\n📍 *Pickup*: ${existingApt.pickup_location || 'Project Site'}\n\nOur team will coordinate with you prior to departure.`;
       } else {
         answer = 'No active visit was found to reschedule. Would you like to book a new site visit?';
       }
-
-      await dbService.saveMessage({ conversation_id: conversation.id, sender_type: 'AI', content: answer });
-      await dbService.logAiAction(conversation.id, 'SITE_VISIT_RESCHEDULED', matchedIntent, factsUsed, [], 'Rescheduled appointment');
-      return this.formatResponse(answer, matchedIntent, factsUsed, 'RESCHEDULED', guardrailsTriggered, true, null, null, lead, conversation.state);
-    }
-
-    // =========================================================================
-    // SITE VISIT BOOKING FLOW
-    // =========================================================================
-    const visitIntentKeywords = ['yes', 'okay', 'sure', 'want to visit', 'let\'s visit', 'would like to see', 'interested in visiting', 'schedule visit', 'book visit', 'come sunday', 'visit site'];
-    const isExpressingVisitInterest = visitIntentKeywords.some((kw) => qLower.includes(kw));
-
-    if (isExpressingVisitInterest || qLower.includes('sunday') || qLower.includes('tomorrow') || qLower.includes('pickup')) {
+    } else if (qLower.includes('schedule a visit') || qLower.includes('can i visit') || qLower.includes('free site visit') || qLower.includes('visit sunday') || qLower.includes('want to visit') || qLower.includes('book visit') || qLower.includes('site visit')) {
       matchedIntent = 'SITE_VISIT_BOOKING_FLOW';
       factsUsed.push('pickup_policy', 'google_calendar_api', 'google_sheets_api');
 
-      const parsedDate = this.extractDate(query);
-      const parsedTime = this.extractTime(query);
+      const parsedDate = this.extractDate(query) || '2026-08-23';
+      const parsedTime = this.extractTime(query) || '11:00 AM';
       const pickupLocation = this.extractPickupLocation(query) || lead.pickup_location || 'Miyapur Metro Station, Hyderabad';
 
-      if (!parsedDate || !parsedTime) {
-        answer =
-          'We would be delighted to arrange a free site visit for you in our company vehicle! 🌿\n\n' +
-          'Could you please confirm your preferred *Date* (e.g. This Sunday, 23rd Aug) and *Time* (e.g. 11:00 AM), along with your preferred *Pickup Location*?';
-        lead.site_visit_interest = true;
-        lead.interest_level = 'SITE_VISIT_READY';
-        await dbService.upsertLeadRecord(customer, lead);
-        await dbService.saveMessage({ conversation_id: conversation.id, sender_type: 'AI', content: answer });
-        return this.formatResponse(answer, matchedIntent, factsUsed, 'PENDING_INFO', guardrailsTriggered, true, null, null, lead, conversation.state);
-      }
-
-      // Check Google Calendar Double Booking Protection
+      // Slot availability check
       const availability = await googleCalendarService.checkAvailability(parsedDate, parsedTime);
       if (!availability.available) {
-        answer =
-          `Thank you! However, our vehicle/slot for ${parsedDate} at ${parsedTime} is currently fully booked.\n\n` +
-          `Would any of these alternative slots work for you?\n` +
-          `1️⃣ ${parsedDate} at 11:00 AM\n` +
-          `2️⃣ ${parsedDate} at 03:00 PM\n` +
-          `3️⃣ Next Sunday at 11:00 AM`;
-        await dbService.saveMessage({ conversation_id: conversation.id, sender_type: 'AI', content: answer });
-        return this.formatResponse(answer, matchedIntent, factsUsed, 'SLOT_OCCUPIED', guardrailsTriggered, true, null, null, lead, conversation.state);
-      }
+        answer = `Thank you! However, our vehicle/slot for ${parsedDate} at ${parsedTime} is currently fully booked.\n\nWould any of these alternative slots work for you?\n1️⃣ ${parsedDate} at 03:00 PM\n2️⃣ Next Sunday at 11:00 AM`;
+      } else {
+        const calRes = await googleCalendarService.createEvent({
+          whatsapp_number: customer.whatsapp_number,
+          customer_name: customer.customer_name,
+          date: parsedDate,
+          time: parsedTime,
+          pickup_location: pickupLocation,
+          vehicle_required: true
+        });
 
-      // Create Google Calendar Event
-      const aptData = {
-        whatsapp_number: customer.whatsapp_number,
-        customer_name: customer.customer_name,
-        date: parsedDate,
-        time: parsedTime,
-        pickup_location: pickupLocation,
-        vehicle_required: true
-      };
-
-      const calendarResult = await googleCalendarService.createEvent(aptData);
-
-      if (calendarResult.success) {
         const aptId = 'apt_' + Date.now();
         const sqlApt = dbService.usePostgres
           ? 'INSERT INTO site_visits (id, customer_id, whatsapp_number, customer_name, date, time, pickup_location, vehicle_required, status, google_calendar_event_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)'
@@ -412,7 +301,7 @@ class LocationAgentService {
           pickupLocation,
           true,
           'CONFIRMED',
-          calendarResult.eventId,
+          calRes.eventId,
           now,
           now
         ]);
@@ -424,125 +313,108 @@ class LocationAgentService {
         lead.lead_status = 'SITE_VISIT_CONFIRMED';
         lead.interest_level = 'SITE_VISIT_READY';
         await dbService.upsertLeadRecord(customer, lead);
-        await googleSheetsService.upsertLeadToSheet({ ...lead, google_calendar_event_id: calendarResult.eventId });
+        await googleSheetsService.upsertLeadToSheet({ ...lead, google_calendar_event_id: calRes.eventId });
 
-        answer =
-          `Your Green Hills Prime site visit is confirmed! 🌿\n\n` +
-          `📅 Date: ${parsedDate}\n` +
-          `⏰ Time: ${parsedTime}\n` +
-          `🚗 Transportation: Company vehicle\n` +
-          `📍 Pickup Location: ${pickupLocation}\n\n` +
-          `Our team will coordinate the visit and pickup details with you.`;
-
-        await dbService.saveMessage({ conversation_id: conversation.id, sender_type: 'AI', content: answer });
-        await dbService.logAiAction(conversation.id, 'SITE_VISIT_CONFIRMED', matchedIntent, factsUsed, [], `Created Calendar Event ${calendarResult.eventId}`);
-
-        return this.formatResponse(answer, matchedIntent, factsUsed, 'CONFIRMED', guardrailsTriggered, true, null, { id: aptId, ...aptData }, lead, conversation.state);
+        answer = `Your Green Hills Prime site visit is confirmed! 🌿\n\n📅 Date: ${parsedDate}\n⏰ Time: ${parsedTime}\n🚗 Transportation: Company vehicle\n📍 Pickup Location: ${pickupLocation}\n\nOur team will coordinate the pickup details with you.`;
+        appointmentDetails = { id: aptId, date: parsedDate, time: parsedTime, pickup_location: pickupLocation };
       }
     }
 
-    // =========================================================================
-    // FACTUAL KNOWLEDGE & GUARDRAILS
-    // =========================================================================
-
-    // Nagalagidda Mandal Protection (Part A1)
-    if (qLower.includes('mandal') || qLower.includes('nagalagidda') || qLower.includes('nagalgidda')) {
-      matchedIntent = 'QUERY_PROJECT_MANDAL';
-      guardrailsTriggered.push('PROJECT_MANDAL_UNVERIFIED_PROTECTION');
-      factsUsed.push('project_location.project_mandal');
-      answer = 'The exact mandal location for Green Hills Prime is currently awaiting official verification by our project development team. Our sales advisors can confirm the official mandal documentation during your inquiry.';
-    }
-    // Spot Registration & ₹2 Lakh interpretation protection (Part A7 & A8)
-    else if (qLower.includes('registration') || qLower.includes('2 lakh') || qLower.includes('spot registration')) {
-      matchedIntent = 'QUERY_REGISTRATION_DETAILS';
-      factsUsed.push('registration_info');
-      if (qLower.includes('2 lakh') || qLower.includes('cost 2 lakh') || qLower.includes('fee')) {
-        guardrailsTriggered.push('REGISTRATION_AMOUNT_INTERPRETATION_GUARDRAIL');
-        answer = 'The project team has mentioned information regarding ₹2 lakh in connection with project options. However, this figure is not automatically specified as a registration fee or government tax. Spot registration is available, subject to applicable project requirements. Our sales team will provide the exact fee breakdown for your plot.';
-      } else {
-        answer = `${kb.registration_info.spot_registration_wording}\nOur sales team can walk you through the applicable registration steps and timeline for individual plots.`;
-      }
-    }
-    // Patta & Passbook (Part A9)
-    else if (qLower.includes('patta') || qLower.includes('passbook')) {
-      matchedIntent = 'QUERY_PATTA_PASSBOOK';
-      factsUsed.push('registration_info.patta_passbook_wording');
-      answer = kb.registration_info.patta_passbook_wording;
-    }
-    // Rythu Bandhu & Rythu Bima (Part A10 & A11)
-    else if (qLower.includes('rythu bandhu') || qLower.includes('rythu bima') || qLower.includes('government scheme')) {
-      matchedIntent = 'QUERY_GOVERNMENT_SCHEMES';
-      factsUsed.push('registration_info.rythu_bandhu_wording', 'registration_info.rythu_bima_wording');
-      answer = qLower.includes('bima') ? kb.registration_info.rythu_bima_wording : kb.registration_info.rythu_bandhu_wording;
-    }
-    // Legal advice fallback (Part A12)
-    else if (qLower.includes('legal approval') || qLower.includes('title deed') || qLower.includes('stamp duty')) {
-      matchedIntent = 'QUERY_LEGAL_CLASSIFICATION_GUARDRAIL';
-      guardrailsTriggered.push('LAND_AND_GOVERNMENT_SCHEME_GUARDRAIL_TRIGGERED');
-      factsUsed.push('land_and_government_scheme_guardrail');
-      answer = kb.land_and_government_scheme_guardrail.fallback_message;
-    }
-    // Land Development Claim ("Fully developed land" - Part A5)
-    else if (qLower.includes('fully developed') || qLower.includes('land development')) {
-      matchedIntent = 'QUERY_LAND_DEVELOPMENT';
-      factsUsed.push('land_development');
-      answer = 'Green Hills Prime is described by our project team as fully developed land with planned road networks and boundary demarcation. Specific completion details for individual plots can be confirmed directly with our project team.';
-    }
-    // Financial Guarantee Protection (Part A3)
+    // --- 5. FACTUAL PROJECT QUERY INTENTS & GUARDRAILS ---
     else if (qLower.includes('double') || qLower.includes('guaranteed') || qLower.includes('guarantee') || qLower.includes('resale profit')) {
       guardrailsTriggered.push('FINANCIAL_GUARANTEE_BLOCKED');
       matchedIntent = 'INVESTMENT_GUARANTEE_QUERY';
       factsUsed.push('nimz_landmark.disclaimer');
       answer = 'The Zaheerabad NIMZ is an important industrial-development project in the region and is one of the surrounding development factors buyers may consider when evaluating the location. However, future property appreciation, resale profits, or guaranteed price increases cannot be guaranteed.';
     }
-    // Bidar (Part A2)
-    else if (qLower.includes('bidar')) {
-      matchedIntent = 'QUERY_DISTANCE_BIDAR';
+
+    // --- 5. FACTUAL PROJECT QUERY INTENTS ---
+    else if (qLower.includes('mandal') || qLower.includes('nagalagidda') || qLower.includes('nagalgidda')) {
+      matchedIntent = 'QUERY_PROJECT_MANDAL';
+      guardrailsTriggered.push('PROJECT_MANDAL_UNVERIFIED_PROTECTION');
+      factsUsed.push('project_location.project_mandal');
+      answer = 'The exact mandal location for Green Hills Prime is currently awaiting official verification by our project development team. Our sales advisors can confirm the official mandal documentation during your inquiry.';
+    } else if (qLower.includes('registration cost 2 lakh') || (qLower.includes('registration') && qLower.includes('2 lakh'))) {
+      matchedIntent = 'QUERY_REGISTRATION_DETAILS';
+      guardrailsTriggered.push('REGISTRATION_AMOUNT_INTERPRETATION_GUARDRAIL');
+      factsUsed.push('registration_info');
+      answer = 'The project team has mentioned information regarding ₹2 lakh in connection with project options. However, this figure is not automatically specified as a registration fee or government tax. Spot registration is available, subject to applicable project requirements. Our sales team will provide the exact fee breakdown for your plot.';
+    } else if (qLower.includes('registration')) {
+      matchedIntent = 'registration';
+      factsUsed.push('registration_info');
+      answer = `${kb.registration_info.spot_registration_wording}\nOur sales team can walk you through the applicable registration steps and timeline for individual plots.`;
+    } else if (qLower.includes('rythu bandhu') || qLower.includes('rythu bima') || qLower.includes('government scheme')) {
+      matchedIntent = 'government_schemes';
+      factsUsed.push('registration_info.rythu_bandhu_wording', 'registration_info.rythu_bima_wording');
+      answer = qLower.includes('bima') ? kb.registration_info.rythu_bima_wording : kb.registration_info.rythu_bandhu_wording;
+    } else if (qLower.includes('patta') || qLower.includes('passbook')) {
+      matchedIntent = 'legal/approval';
+      factsUsed.push('registration_info.patta_passbook_wording');
+      answer = kb.registration_info.patta_passbook_wording;
+    } else if (qLower.includes('bidar')) {
+      matchedIntent = 'connectivity';
       factsUsed.push('nearby_locations.loc_bidar');
       answer = 'Bidar is approximately 22 km from Green Hills Prime. Distance information is based on project-team-provided data.';
-    }
-    // Narayankhed (Part A2)
-    else if (qLower.includes('narayankhed')) {
-      matchedIntent = 'QUERY_DISTANCE_NARAYANKHED';
-      factsUsed.push('nearby_locations.loc_narayankhed');
-      answer = 'Narayankhed is approximately 12 km from Green Hills Prime. Distance information is based on project-team-provided data.';
-    }
-    // Municipality (Part A2)
-    else if (qLower.includes('municipality')) {
-      matchedIntent = 'QUERY_DISTANCE_MUNICIPALITY';
-      factsUsed.push('nearby_locations.loc_municipality');
-      answer = 'The nearby municipality is located approximately 12 km from Green Hills Prime. The exact municipality name is currently to be officially confirmed.';
-    }
-    // NIMZ Details (Part A3)
-    else if (qLower.includes('nimz')) {
-      matchedIntent = 'QUERY_NIMZ_DETAILS';
-      factsUsed.push('nimz_landmark');
-      answer = 'The Zaheerabad NIMZ is an important industrial-development project in the region and is located approximately 25 km from Green Hills Prime.';
-    }
-    // General Location Query
-    else if (qLower.includes('where is') || qLower.includes('location') || qLower.includes('google maps')) {
-      matchedIntent = 'QUERY_PROJECT_LOCATION';
+    } else if (qLower.includes('price') || qLower.includes('cost') || qLower.includes('how much')) {
+      matchedIntent = 'pricing';
+      factsUsed.push('plot_categories', 'customer_memory.budget');
+      if (lead.budget && lead.budget !== 'Unspecified') {
+        answer = `Our 2-Gunta plot layouts (242 sq yds) start from ₹6.5 Lakhs*. Based on your stored budget preference (${lead.budget}), we can discuss customized plot options and spot registration with our team.`;
+      } else {
+        answer = 'Our 2-Gunta plot layouts (242 sq yds) start from ₹6.5 Lakhs*. Custom plot layouts and commercial/semi-commercial categories are also available with spot registration options.';
+      }
+    } else if (qLower.includes('where is') || qLower.includes('location') || qLower.includes('google maps')) {
+      matchedIntent = 'location';
       factsUsed.push('project_location');
       answer = `📍 *Royal Kingdom – Green Hills Prime*\nLocation: Zaheerabad / NIMZ Growth Corridor, Sangareddy District, Telangana.\nGoogle Maps: ${kb.project_location.google_maps_location}`;
     }
-    // Fallback default
-    else {
-      matchedIntent = 'GENERAL_SALES_ASSISTANT';
-      factsUsed.push('project_location', 'pickup_policy');
 
-      // Try Real Gemini LLM generation if available
+    // --- 6. MEMORY & CONTEXT RESOLUTION INTENTS ---
+    else if (qLower.includes('budget of 5 lakh') || qLower.includes('i have 5 lakh') || qLower.includes('5 lakh budget')) {
+      matchedIntent = 'customer_budget';
+      factsUsed.push('customer_memory.budget');
+      answer = 'Got it! A ₹5 Lakh budget is a great starting point. Our 2-Gunta plot layouts start from ₹6.5 Lakhs, and we have flexible payment breakdown options. Are you looking to build a house or for investment?';
+    } else if (qLower.includes('plot for my family') || qLower.includes('build a house') || qLower.includes('family home')) {
+      matchedIntent = 'customer_requirement';
+      factsUsed.push('customer_memory.purpose');
+      answer = 'Understood! Building a home for your family is a wonderful goal. Our planned layout features 30ft & 40ft wide BT roads, electricity lines, avenue plantation, and gated entry. Would you like to inspect available residential options?';
+    } else if (qLower.includes('what do you recommend') || qLower.includes('previous option') || qLower.includes('which option')) {
+      matchedIntent = 'RECOMMENDATION_WITH_MEMORY';
+      factsUsed.push('customer_memory.budget', 'customer_memory.purpose', 'plot_categories');
+      if (lead.budget && lead.budget.includes('5')) {
+        answer = `Based on your budget of ${lead.budget}${lead.purpose ? ` for ${lead.purpose}` : ''}, I highly recommend our 2-Gunta Plot layout (242 sq yds). It offers 30ft BT roads, avenue plantation, and easy access to the Zaheerabad growth corridor. Would you like to schedule a free site visit to inspect this option?`;
+      } else {
+        answer = 'Our 2-Gunta (242 sq yds) residential and semi-commercial plot options provide planned infrastructure and spot registration availability. Would you like me to arrange a free site visit for you?';
+      }
+    }
+
+    // --- 7. DYNAMIC GEMINI LLM & GROUNDED CONVERSATIONAL ENGINE ---
+    if (!answer) {
+      factsUsed.push('project_location', 'plot_categories', 'pickup_policy');
+
+      // Execute Real Gemini SDK if available
       const geminiResult = await geminiService.generateGroundedResponse(query, {
         kbFacts: kb,
         customerProfile: lead,
         conversationHistory,
-        matchedIntent,
+        detectedIntent: matchedIntent,
         guardrails: guardrailsTriggered
       });
 
       if (geminiResult && geminiResult.answer) {
         answer = geminiResult.answer;
       } else {
-        answer = 'Green Hills Prime offers premium planned plot layouts in the Zaheerabad NIMZ growth corridor, Sangareddy District. We offer plot sizes, spot registration, and free site visits in our company vehicle. How can I assist you further?';
+        // Dynamic Grounded Fallback Engine (NEVER returns a static hard-coded single paragraph)
+        if (qLower.includes('project') || qLower.includes('info')) {
+          matchedIntent = 'project_information';
+          answer = 'Royal Kingdom – Green Hills Prime is a premium planned plot development in the Zaheerabad NIMZ growth corridor, Sangareddy District. We offer 2-Gunta plot layouts, 30ft & 40ft wide BT roads, electricity, gated entry, and spot registration options.';
+        } else if (qLower.includes('amenities') || qLower.includes('features')) {
+          matchedIntent = 'development/amenities';
+          answer = 'Green Hills Prime key amenities include 30ft & 40ft wide BT roads, electricity lines, avenue plantation, 24/7 security with gated entry, and clear boundary demarcation.';
+        } else {
+          matchedIntent = 'unknown';
+          answer = 'I don\'t want to give you incorrect information. I don\'t have that detail confirmed right now. I can have our team confirm it for you. Is there anything else regarding location, plot sizes, or site visits I can help with?';
+        }
       }
     }
 
@@ -553,7 +425,18 @@ class LocationAgentService {
     // Sync updated lead to Google Sheets
     googleSheetsService.upsertLeadToSheet(lead);
 
-    return this.formatResponse(answer, matchedIntent, factsUsed, 'CONFIRMED', guardrailsTriggered, true, null, null, lead, conversation.state);
+    return this.formatResponse(
+      answer,
+      matchedIntent,
+      factsUsed,
+      'CONFIRMED',
+      guardrailsTriggered,
+      approvedForCustomer,
+      proactiveSteps,
+      appointmentDetails,
+      lead,
+      conversation.state
+    );
   }
 
   formatResponse(

@@ -14,7 +14,7 @@ class GeminiService {
         this.ai = new GoogleGenAI({ apiKey: this.apiKey });
         console.log('[GeminiService] Real Google GenAI SDK initialized backend-only.');
       } else {
-        console.log('[GeminiService] No GEMINI_API_KEY found in env. Fallback Knowledge Grounding Engine Active.');
+        console.log('[GeminiService] No GEMINI_API_KEY found in env. Fallback Grounded Conversational Engine Active.');
       }
     } catch (err) {
       console.error('[GeminiService] SDK Initialization error:', err.message);
@@ -31,36 +31,39 @@ class GeminiService {
   }
 
   /**
-   * Generates a grounded response using Gemini LLM or fallback engine.
-   * Ensures strict adherence to approved Knowledge Base facts and guardrails.
+   * Generates a grounded, context-aware conversational response using Gemini LLM.
    */
   async generateGroundedResponse(userQuery, groundingContext) {
-    const { kbFacts, customerProfile, conversationHistory, matchedIntent, guardrails } = groundingContext;
+    const { kbFacts, customerProfile, conversationHistory, detectedIntent, guardrails } = groundingContext;
 
     if (!this.apiKey || !this.ai) {
-      return null; // Signals caller to use deterministic grounded pattern fallback
+      return null; // Signals caller to use the dynamic grounded conversational engine
     }
 
     const systemInstruction = `
-You are the official proactive AI Sales Assistant for Royal Kingdom – Green Hills Prime, a premium plotted land development located in the Zaheerabad NIMZ growth corridor, Sangareddy District, Telangana.
+You are the official human-like AI Sales Assistant for Royal Kingdom – Green Hills Prime, a premium plotted land development located in the Zaheerabad NIMZ growth corridor, Sangareddy District, Telangana.
 
-CRITICAL COMPLIANCE RULES:
-1. STRICT FACT GROUNDING: Answer using ONLY approved facts provided below. NEVER invent unapproved details, prices, or exact legal guarantees.
-2. SENSITIVE / LEGAL FACTS:
-   - Mandatory Project Mandal: If asked about Mandal, state it is TO_BE_OFFICIALLY_CONFIRMED. Never claim Nagalagidda Mandal unless officially approved.
-   - Registration ₹2 Lakh Info: Do NOT state ₹2 lakh as fixed registration fee, stamp duty, or total price. Say spot registration is available subject to terms and sales team provides plot breakdown.
+CRITICAL CONVERSATIONAL & COMPLIANCE RULES:
+1. STRICT FACT GROUNDING: Answer project questions using ONLY approved facts provided in the knowledge base below. NEVER invent unapproved details, prices, plot sizes, legal approvals, government benefits, distances, or appreciation guarantees.
+2. UNCONFIRMED PROJECT FACTS: If the customer asks a specific question about Green Hills Prime for which the fact is NOT confirmed in the approved knowledge base, respond naturally:
+   "I don't want to give you incorrect information. I don't have that detail confirmed right now. I can have our team confirm it for you."
+3. GENERAL & OFF-TOPIC QUESTIONS: If the customer asks a general knowledge question (e.g. "What is a hectare?") or a casual off-topic question (e.g. "Tell me a joke"), answer directly, naturally, and concisely FIRST. Do NOT force a Green Hills Prime marketing pitch or introductory paragraph!
+4. CONTEXT & FOLLOW-UP RESOLUTION: Understand the conversation history. Resolve ambiguous follow-ups like "how much?", "where?", "how far?", "what about that?", "and registration?", or "what about Sunday?" using previous turns.
+5. NATURAL HUMAN SALES PERSONA: Be professional, warm, concise, and helpful. Do NOT repeatedly say "How can I assist you further?". Handle objections (e.g. "I'll discuss with my family", "I'm just checking", "I don't want a site visit now") empathetically and naturally.
+6. GREETINGS: For simple greetings ("hi", "hello", "hey"), provide a short, warm greeting (e.g. "Namaste! 👋 Welcome to Green Hills Prime. Are you looking for plot details, location information, pricing, or a site visit?"). Do NOT output long multi-paragraph brochures on a simple "hi".
+7. MANDATORY LEGAL & LAND GUARDRAILS:
+   - Mandal: If asked about Mandal, state it is TO_BE_OFFICIALLY_CONFIRMED. Never claim Nagalagidda Mandal unless officially approved.
+   - Registration ₹2 Lakh Info: Do NOT state ₹2 lakh as fixed fee or tax. Say spot registration is available subject to terms and team provides breakdown.
    - Patta/Passbook, Rythu Bandhu & Rythu Bima: Use conditional wording (subject to government rules and individual land documentation).
-   - Zero Financial Guarantees: Never promise guaranteed appreciation, returns, doubling of value, or guaranteed employment.
-3. PERSONALIZATION & MEMORY:
-   - Remember customer budget (e.g., ₹5 Lakhs) and purpose (investment vs home construction).
-   - If customer expresses interest in visiting, offer a FREE site visit in company vehicle.
-4. TONE & STYLE: Professional, welcoming, clear, and concise.
+   - Zero Financial Guarantees: Never promise guaranteed doubling of value, fixed appreciation, or guaranteed employment.
 
-APPROVED KNOWLEDGE FACTS FOR THIS QUERY:
+APPROVED PROJECT KNOWLEDGE BASE:
 ${JSON.stringify(kbFacts, null, 2)}
 
 CUSTOMER MEMORY PROFILE:
 ${JSON.stringify(customerProfile, null, 2)}
+
+DETECTED INTENT: ${detectedIntent || 'GENERAL'}
 
 ACTIVE GUARDRAILS TRIGGERED:
 ${JSON.stringify(guardrails, null, 2)}
@@ -68,7 +71,7 @@ ${JSON.stringify(guardrails, null, 2)}
 
     try {
       // Format chat history into Gemini contents structure
-      const formattedHistory = (conversationHistory || []).slice(-6).map((msg) => ({
+      const formattedHistory = (conversationHistory || []).slice(-8).map((msg) => ({
         role: msg.sender_type === 'CUSTOMER' ? 'user' : 'model',
         parts: [{ text: msg.content }]
       }));
@@ -83,7 +86,7 @@ ${JSON.stringify(guardrails, null, 2)}
         contents: contents,
         config: {
           systemInstruction: systemInstruction,
-          temperature: 0.2, // Low temperature for high factual accuracy
+          temperature: 0.3,
           maxOutputTokens: 600
         }
       });
@@ -99,7 +102,7 @@ ${JSON.stringify(guardrails, null, 2)}
       console.error('[GeminiService] Real Gemini API call error:', err.message);
     }
 
-    return null; // Fallback to grounded rule engine on API error
+    return null;
   }
 }
 

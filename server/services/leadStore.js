@@ -36,7 +36,8 @@ class LeadStore {
       fs.writeFileSync(LEADS_FILE, JSON.stringify(data, null, 2), 'utf8');
       return true;
     } catch (err) {
-      console.error('Failed to save leadsData.json:', err.message);
+      // Vercel serverless environment has a read-only filesystem. State is safely kept in memory/database.
+      console.warn('[LeadStore] Local file write skipped (Read-only filesystem):', err.message);
       return false;
     }
   }

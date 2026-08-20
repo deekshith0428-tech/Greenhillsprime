@@ -72,7 +72,7 @@ class DbService {
     try {
       fs.writeFileSync(this.jsonFile, JSON.stringify(this.dbData, null, 2), 'utf8');
     } catch (err) {
-      console.error('[DbService] Pure JS JSON DB Save Error:', err.message);
+      console.warn('[DbService] Local JSON file write skipped (Read-only filesystem on Vercel):', err.message);
     }
   }
 
