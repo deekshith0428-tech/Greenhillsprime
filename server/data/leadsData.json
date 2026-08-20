@@ -18,20 +18,20 @@
       "site_visit_interested": false,
       "site_visit_date": "2026-08-23",
       "site_visit_time": "11 AM",
-      "google_calendar_event_id": "gcal_evt_1787236695323",
+      "google_calendar_event_id": "gcal_evt_1787241036045",
       "vehicle_required": true,
       "pickup_location": "Miyapur Metro Station, Hyderabad",
       "media_sent": [],
       "conversation_summary": "",
-      "human_handoff": 0,
-      "last_contacted": "2026-08-20T14:38:15.373Z",
-      "updated_at": "2026-08-20T14:38:15.373Z",
+      "human_handoff": false,
+      "last_contacted": "2026-08-20T15:51:36.254Z",
+      "updated_at": "2026-08-20T15:51:36.254Z",
       "id": "lead_919998887776",
-      "customer_id": "cust_1787236695260_750",
-      "site_visit_interest": 1,
-      "last_customer_message_at": null,
+      "customer_id": "cust_1787241036031_124",
+      "site_visit_interest": true,
+      "last_customer_message_at": "2026-08-20T15:50:36.034Z",
       "last_ai_message_at": null,
-      "created_at": "2026-08-20T14:38:15.270Z"
+      "created_at": "2026-08-20T15:50:36.034Z"
     },
     {
       "lead_id": "lead_919999922222",
@@ -57,8 +57,9 @@
       "media_sent": [],
       "conversation_summary": "",
       "human_handoff": false,
-      "last_contacted": "2026-08-20T14:36:03.893Z",
-      "updated_at": "2026-08-20T14:36:03.893Z"
+      "last_contacted": "2026-08-20T15:51:56.073Z",
+      "updated_at": "2026-08-20T15:51:56.073Z",
+      "customer_id": "cust_1787241002328_924"
     },
     {
       "lead_id": "lead_919999911111",
@@ -66,9 +67,9 @@
       "customer_name": "Interested Customer",
       "whatsapp_number": "+919999911111",
       "interested": "Yes",
-      "budget": "Not Specified",
-      "preferred_plot_size": "Not Specified",
-      "purpose": "Not Specified",
+      "budget": "Unspecified",
+      "preferred_plot_size": "General",
+      "purpose": "Unspecified",
       "facing_preference": "Flexible",
       "corner_preference": "Flexible",
       "project": "Green Hills Prime",
@@ -84,8 +85,13 @@
       "media_sent": [],
       "conversation_summary": "",
       "human_handoff": false,
-      "last_contacted": "2026-08-20T14:36:03.864Z",
-      "updated_at": "2026-08-20T14:36:03.864Z"
+      "last_contacted": "2026-08-20T15:51:56.067Z",
+      "updated_at": "2026-08-20T15:51:56.067Z",
+      "customer_id": "cust_1787241002322_790",
+      "last_customer_message_at": "2026-08-20T15:51:56.065Z",
+      "id": "lead_919999911111",
+      "site_visit_interest": false,
+      "created_at": "2026-08-20T15:50:02.324Z"
     },
     {
       "lead_id": "lead_919888877774",
@@ -105,20 +111,20 @@
       "site_visit_interested": false,
       "site_visit_date": "2026-08-23",
       "site_visit_time": "11 AM",
-      "google_calendar_event_id": "gcal_evt_1787236563997",
+      "google_calendar_event_id": "gcal_evt_1787241116097",
       "vehicle_required": true,
       "pickup_location": "Miyapur Metro Station, Hyderabad",
       "media_sent": [],
       "conversation_summary": "",
       "human_handoff": 0,
-      "last_contacted": "2026-08-20T14:36:04.001Z",
-      "updated_at": "2026-08-20T14:36:04.001Z",
+      "last_contacted": "2026-08-20T15:51:56.098Z",
+      "updated_at": "2026-08-20T15:51:56.098Z",
       "id": "lead_919888877774",
-      "customer_id": "cust_1787236037083_728",
+      "customer_id": "cust_1787241002353_879",
       "site_visit_interest": true,
       "last_customer_message_at": null,
       "last_ai_message_at": null,
-      "created_at": "2026-08-20T14:27:17.094Z"
+      "created_at": "2026-08-20T15:50:02.355Z"
     },
     {
       "lead_id": "lead_919888877773",
@@ -144,9 +150,9 @@
       "media_sent": [],
       "conversation_summary": "",
       "human_handoff": false,
-      "last_contacted": "2026-08-20T14:36:03.992Z",
-      "updated_at": "2026-08-20T14:36:03.992Z",
-      "customer_id": "cust_1787236037039_954"
+      "last_contacted": "2026-08-20T15:51:56.095Z",
+      "updated_at": "2026-08-20T15:51:56.095Z",
+      "customer_id": "cust_1787241002346_222"
     },
     {
       "lead_id": "lead_919888877772",
@@ -172,9 +178,9 @@
       "media_sent": [],
       "conversation_summary": "",
       "human_handoff": false,
-      "last_contacted": "2026-08-20T14:36:03.970Z",
-      "updated_at": "2026-08-20T14:36:03.970Z",
-      "customer_id": "cust_1787236037003_682"
+      "last_contacted": "2026-08-20T15:51:56.087Z",
+      "updated_at": "2026-08-20T15:51:56.087Z",
+      "customer_id": "cust_1787241002341_645"
     },
     {
       "lead_id": "lead_919888877771",
@@ -200,14 +206,14 @@
       "media_sent": [],
       "conversation_summary": "",
       "human_handoff": 0,
-      "last_contacted": "2026-08-20T14:36:03.940Z",
-      "updated_at": "2026-08-20T14:36:03.940Z",
+      "last_contacted": "2026-08-20T15:51:56.080Z",
+      "updated_at": "2026-08-20T15:51:56.080Z",
       "id": "lead_919888877771",
-      "customer_id": "cust_1787236036961_587",
-      "site_visit_interest": 0,
+      "customer_id": "cust_1787241002334_121",
+      "site_visit_interest": false,
       "last_customer_message_at": null,
       "last_ai_message_at": null,
-      "created_at": "2026-08-20T14:27:16.968Z"
+      "created_at": "2026-08-20T15:50:02.335Z"
     },
     {
       "lead_id": "lead_919777766661",
@@ -233,14 +239,14 @@
       "media_sent": [],
       "conversation_summary": "",
       "human_handoff": 0,
-      "last_contacted": "2026-08-20T14:36:03.913Z",
-      "updated_at": "2026-08-20T14:36:03.913Z",
+      "last_contacted": "2026-08-20T15:51:56.075Z",
+      "updated_at": "2026-08-20T15:51:56.075Z",
       "id": "lead_919777766661",
-      "customer_id": "cust_1787236036937_166",
-      "site_visit_interest": 0,
-      "last_customer_message_at": "2026-08-20T14:36:03.898Z",
+      "customer_id": "cust_1787241002331_229",
+      "site_visit_interest": false,
+      "last_customer_message_at": "2026-08-20T15:51:56.073Z",
       "last_ai_message_at": null,
-      "created_at": "2026-08-20T14:27:16.946Z"
+      "created_at": "2026-08-20T15:50:02.332Z"
     },
     {
       "lead_id": "lead_919876543210",

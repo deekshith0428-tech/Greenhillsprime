@@ -14,8 +14,10 @@ client/node_modules/
 *.sqlite
 *.sqlite-journal
 *.db
+*.json_db
 server/data/*.sqlite
 server/data/*.db
+server/data/green_hills_production_db.json
 
 # Build outputs
 dist/
