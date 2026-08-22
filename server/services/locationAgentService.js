@@ -242,7 +242,14 @@ class LocationAgentService {
 
     // --- 4. DEVELOPMENT & INFRASTRUCTURE INTENT VARIATIONS ---
     else if (
+      qLower.includes('is that area developed') ||
+      qLower.includes('is the area developed') ||
       qLower.includes('will this area be developed') ||
+      qLower.includes('will it be developed') ||
+      qLower.includes('what development is there') ||
+      qLower.includes('how is the development') ||
+      qLower.includes('what facilities are developed') ||
+      qLower.includes('how is the development there') ||
       qLower.includes('what development is planned') ||
       qLower.includes('what development is happening nearby') ||
       qLower.includes('what is developing nearby') ||
@@ -253,11 +260,11 @@ class LocationAgentService {
       qLower.includes('upcoming development') ||
       qLower.includes('why should i invest') ||
       qLower.includes('development features') ||
-      (qLower.includes('develop') && (qLower.includes('area') || qLower.includes('nearby') || qLower.includes('feature') || qLower.includes('plan')))
+      (qLower.includes('develop') && (qLower.includes('area') || qLower.includes('nearby') || qLower.includes('feature') || qLower.includes('plan') || qLower.includes('there') || qLower.includes('how') || qLower.includes('what')))
     ) {
       matchedIntent = 'REGIONAL_DEVELOPMENT_ECOSYSTEM';
-      factsUsed.push('development_ecosystem', 'nimz_landmark', 'land_development', 'resort_and_clubhouse');
-      answer = 'Yes, Green Hills Prime is located in an active regional growth corridor 15 km from Zaheerabad NIMZ. On-site project highlights feature a 2-acre resort + 3-acre water feature zone, 25ft & 30ft wide internal roads, 100ft main road frontage, electricity, geotagging, fruit plantations (Mango, Guava, Sapota, Coconut), and 6 years company maintenance. Would you like plot pricing or to book a free site visit?';
+      factsUsed.push('land_development', 'development_ecosystem', 'nimz_landmark');
+      answer = 'Green Hills Prime is located in an active regional growth corridor 15 km from Zaheerabad NIMZ. On-site project infrastructure includes 25ft, 30ft & 33ft wide internal BT roads, 100ft main road frontage, electricity transformer & streetlights, borewell water storage, 24x7 CCTV security with gated boundary wall, geotagging, fruit plantations (Mango, Guava, Sapota, Coconut), and 6 years company maintenance. Would you like plot pricing or to book a free site visit?';
     }
 
     // --- 5. OBJECTIONS & SALES HESITATION ---
@@ -269,7 +276,7 @@ class LocationAgentService {
       answer = 'Of course, no problem at all! Taking your time with property decisions is very important. Whenever you\'re ready, I can share location details, plot options, or site visit information for your reference.';
     }
 
-    // --- 6. SITE VISIT WORKFLOW (BOOKING / RESCHEDULING / CANCELLATION) ---
+    // --- 6. SITE VISIT WORKFLOW (BOOKING / RESCHEDULING / CANCELLATION / INQUIRY) ---
     else if (qLower.includes('cancel') && (qLower.includes('visit') || qLower.includes('appointment'))) {
       matchedIntent = 'site_visit_cancel';
       factsUsed.push('site_visits');
@@ -345,60 +352,83 @@ class LocationAgentService {
       } else {
         answer = 'No active visit was found to reschedule. Would you like to book a new site visit?';
       }
-    } else if (qLower.includes('schedule a visit') || qLower.includes('can i visit') || qLower.includes('free site visit') || qLower.includes('visit sunday') || qLower.includes('want to visit') || qLower.includes('book visit') || qLower.includes('site visit')) {
+    } else if (
+      qLower.includes('when visit') ||
+      qLower.includes('when can i visit') ||
+      qLower.includes('when can i come') ||
+      qLower.includes('can i visit') ||
+      qLower.includes('can i come') ||
+      qLower.includes('want to visit') ||
+      qLower.includes('want to see the site') ||
+      qLower.includes('show me the place') ||
+      qLower.includes('show me the site') ||
+      qLower.includes('see the site') ||
+      qLower.includes('book a visit') ||
+      qLower.includes('book visit') ||
+      qLower.includes('schedule a visit') ||
+      qLower.includes('free site visit') ||
+      qLower.includes('site visit') ||
+      (previousMessage.toLowerCase().includes('visit') && (qLower === 'when' || qLower === 'when?' || qLower.includes('tomorrow') || qLower.includes('sunday') || qLower.includes('monday')))
+    ) {
       matchedIntent = 'SITE_VISIT_BOOKING_FLOW';
       factsUsed.push('pickup_policy', 'google_calendar_api', 'google_sheets_api');
 
-      const parsedDate = this.extractDate(query) || '2026-08-23';
-      const parsedTime = this.extractTime(query) || '11:00 AM';
-      const pickupLocation = this.extractPickupLocation(query) || lead.pickup_location || 'Miyapur Metro Station, Hyderabad';
+      const hasSpecificDateOrTime = this.extractDate(query) || this.extractTime(query) || qLower.includes('tomorrow') || qLower.includes('sunday') || qLower.includes('monday') || qLower.includes('schedule') || qLower.includes('book');
 
-      // Slot availability check
-      const availability = await googleCalendarService.checkAvailability(parsedDate, parsedTime);
-      if (!availability.available) {
-        answer = `Thank you! However, our vehicle/slot for ${parsedDate} at ${parsedTime} is currently fully booked.\n\nWould any of these alternative slots work for you?\n1️⃣ ${parsedDate} at 03:00 PM\n2️⃣ Next Sunday at 11:00 AM`;
+      if (!hasSpecificDateOrTime && (qLower === 'when visit' || qLower === 'when can i visit' || qLower === 'can i visit' || qLower.includes('want to see') || qLower.includes('show me the place') || (previousMessage.toLowerCase().includes('visit') && qLower.includes('when')))) {
+        answer = 'Yes, you can schedule a free site visit! We provide complimentary company vehicle pickup from Hyderabad. Tell me your preferred date and time, and I will be happy to arrange it for you.';
       } else {
-        const calRes = await googleCalendarService.createEvent({
-          whatsapp_number: customer.whatsapp_number,
-          customer_name: customer.customer_name,
-          date: parsedDate,
-          time: parsedTime,
-          pickup_location: pickupLocation,
-          vehicle_required: true
-        });
+        const parsedDate = this.extractDate(query) || '2026-08-23';
+        const parsedTime = this.extractTime(query) || '11:00 AM';
+        const pickupLocation = this.extractPickupLocation(query) || lead.pickup_location || 'Miyapur Metro Station, Hyderabad';
 
-        const aptId = 'apt_' + Date.now();
-        const sqlApt = dbService.usePostgres
-          ? 'INSERT INTO site_visits (id, customer_id, whatsapp_number, customer_name, date, time, pickup_location, vehicle_required, status, google_calendar_event_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)'
-          : 'INSERT INTO site_visits (id, customer_id, whatsapp_number, customer_name, date, time, pickup_location, vehicle_required, status, google_calendar_event_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        // Slot availability check
+        const availability = await googleCalendarService.checkAvailability(parsedDate, parsedTime);
+        if (!availability.available) {
+          answer = `Thank you! However, our vehicle/slot for ${parsedDate} at ${parsedTime} is currently fully booked.\n\nWould any of these alternative slots work for you?\n1️⃣ ${parsedDate} at 03:00 PM\n2️⃣ Next Sunday at 11:00 AM`;
+        } else {
+          const calRes = await googleCalendarService.createEvent({
+            whatsapp_number: customer.whatsapp_number,
+            customer_name: customer.customer_name,
+            date: parsedDate,
+            time: parsedTime,
+            pickup_location: pickupLocation,
+            vehicle_required: true
+          });
 
-        const now = new Date().toISOString();
-        await dbService.query(sqlApt, [
-          aptId,
-          customer.id,
-          customer.whatsapp_number,
-          customer.customer_name,
-          parsedDate,
-          parsedTime,
-          pickupLocation,
-          true,
-          'CONFIRMED',
-          calRes.eventId,
-          now,
-          now
-        ]);
+          const aptId = 'apt_' + Date.now();
+          const sqlApt = dbService.usePostgres
+            ? 'INSERT INTO site_visits (id, customer_id, whatsapp_number, customer_name, date, time, pickup_location, vehicle_required, status, google_calendar_event_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)'
+            : 'INSERT INTO site_visits (id, customer_id, whatsapp_number, customer_name, date, time, pickup_location, vehicle_required, status, google_calendar_event_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-        lead.site_visit_interest = true;
-        lead.site_visit_date = parsedDate;
-        lead.site_visit_time = parsedTime;
-        lead.pickup_location = pickupLocation;
-        lead.lead_status = 'SITE_VISIT_CONFIRMED';
-        lead.interest_level = 'SITE_VISIT_READY';
-        await dbService.upsertLeadRecord(customer, lead);
-        await googleSheetsService.upsertLeadToSheet({ ...lead, google_calendar_event_id: calRes.eventId });
+          const now = new Date().toISOString();
+          await dbService.query(sqlApt, [
+            aptId,
+            customer.id,
+            customer.whatsapp_number,
+            customer.customer_name,
+            parsedDate,
+            parsedTime,
+            pickupLocation,
+            true,
+            'CONFIRMED',
+            calRes.eventId,
+            now,
+            now
+          ]);
 
-        answer = `Your Green Hills Prime site visit is confirmed! 🌿\n\n📅 Date: ${parsedDate}\n⏰ Time: ${parsedTime}\n🚗 Transportation: Company vehicle\n📍 Pickup Location: ${pickupLocation}\n\nOur team will coordinate the pickup details with you.`;
-        appointmentDetails = { id: aptId, date: parsedDate, time: parsedTime, pickup_location: pickupLocation };
+          lead.site_visit_interest = true;
+          lead.site_visit_date = parsedDate;
+          lead.site_visit_time = parsedTime;
+          lead.pickup_location = pickupLocation;
+          lead.lead_status = 'SITE_VISIT_CONFIRMED';
+          lead.interest_level = 'SITE_VISIT_READY';
+          await dbService.upsertLeadRecord(customer, lead);
+          await googleSheetsService.upsertLeadToSheet({ ...lead, google_calendar_event_id: calRes.eventId });
+
+          answer = `Your Green Hills Prime site visit is confirmed! 🌿\n\n📅 Date: ${parsedDate}\n⏰ Time: ${parsedTime}\n🚗 Transportation: Company vehicle\n📍 Pickup Location: ${pickupLocation}\n\nOur team will coordinate the pickup details with you.`;
+          appointmentDetails = { id: aptId, date: parsedDate, time: parsedTime, pickup_location: pickupLocation };
+        }
       }
     }
 

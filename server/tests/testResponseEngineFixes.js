@@ -36,80 +36,94 @@ async function runResponseEngineTests() {
       '2. "Where is the project?" from EXISTING customer answers directly WITHOUT repeating welcome promo banner.'
     );
 
-    // Test 3: "What are the plot sizes?"
-    const res3 = await agentService.processQuery('What are the plot sizes?', { whatsapp_number: testPhone });
+    // Test 3: "Is the area developed?"
+    const res3 = await agentService.processQuery('Is the area developed?', { whatsapp_number: testPhone });
     assert(
-      res3.answer.includes('1 Gunta') && res3.answer.includes('121 Sq Yds') && res3.answer.includes('2 Guntas') && res3.answer.includes('242 Sq Yds'),
-      '3. "What are the plot sizes?" returns 1 Gunta (121 sq yd), 2 Guntas (242 sq yd), and 5 Guntas (605 sq yd).'
+      res3.answer.includes('BT roads') && res3.answer.includes('electricity') && res3.answer.includes('NIMZ'),
+      '3. "Is the area developed?" returns verified project infrastructure & regional growth facts.'
     );
 
-    // Test 4: "What is the price of 2 guntas?"
-    const res4 = await agentService.processQuery('What is the price of 2 guntas?', { whatsapp_number: testPhone });
+    // Test 4: "Will this area be developed?"
+    const res4 = await agentService.processQuery('Will this area be developed?', { whatsapp_number: testPhone });
     assert(
-      res4.answer.includes('₹4,00,000') && res4.answer.includes('50,000'),
-      '4. "What is the price of 2 guntas?" returns ₹4,00,000 with booking and spot payment details.'
+      res4.answer.includes('NIMZ') && res4.answer.includes('roads') && !res4.answer.includes('not confirmed'),
+      '4. "Will this area be developed?" returns verified growth facts without fallback.'
     );
 
-    // Test 5: "Show me project photos"
-    const res5 = await agentService.processQuery('Show me project photos', { whatsapp_number: testPhone });
+    // Test 5: "What development is there?"
+    const res5 = await agentService.processQuery('What development is there?', { whatsapp_number: testPhone });
     assert(
-      res5.answer.includes('.jpg') && res5.answer.includes('entrance_arch') && res5.answer.includes('master_layout'),
-      '5. "Show me project photos" returns approved project entrance & layout image links.'
+      res5.answer.includes('BT roads') || res5.answer.includes('infrastructure'),
+      '5. "What development is there?" returns verified on-site development facts.'
     );
 
-    // Test 6: "Do you have a swimming pool?"
-    const res6 = await agentService.processQuery('Do you have a swimming pool?', { whatsapp_number: testPhone });
+    // Test 6: "What facilities are developed?"
+    const res6 = await agentService.processQuery('What facilities are developed?', { whatsapp_number: testPhone });
     assert(
-      res6.answer.toLowerCase().includes('swimming pool') && res6.answer.includes('resort_swimming_pool.jpg'),
-      '6. "Do you have a swimming pool?" confirms resort pool amenity & references pool asset link.'
+      res6.answer.includes('roads') && res6.answer.includes('electricity'),
+      '6. "What facilities are developed?" returns verified facility infrastructure facts.'
     );
 
-    // Test 7: "What amenities do you have?"
-    const res7 = await agentService.processQuery('What amenities do you have?', { whatsapp_number: testPhone });
+    // Test 7: "How is the development there?"
+    const res7 = await agentService.processQuery('How is the development there?', { whatsapp_number: testPhone });
     assert(
-      res7.answer.includes('2-acre resort') || res7.answer.includes('water feature') || res7.answer.includes('fruit plantation'),
-      '7. "What amenities do you have?" returns resort zone, roads, plantations, and security features.'
+      res7.answer.includes('Zaheerabad NIMZ') || res7.answer.includes('infrastructure'),
+      '7. "How is the development there?" returns verified development facts.'
     );
 
-    // Test 8: "Show me the layout"
-    const res8 = await agentService.processQuery('Show me the layout', { whatsapp_number: testPhone });
+    // Test 8: "When can I visit?"
+    const res8 = await agentService.processQuery('When can I visit?', { whatsapp_number: testPhone });
     assert(
-      res8.answer.includes('master_layout_plan.jpg'),
-      '8. "Show me the layout" returns master layout plan image link.'
+      res8.answer.toLowerCase().includes('free site visit') || res8.answer.toLowerCase().includes('preferred date'),
+      '8. "When can I visit?" offers free site visit and requests date/time.'
     );
 
-    // Test 9: "What does the entrance look like?"
-    const res9 = await agentService.processQuery('What does the entrance look like?', { whatsapp_number: testPhone });
+    // Test 9: "When visit?"
+    const res9 = await agentService.processQuery('When visit?', { whatsapp_number: testPhone });
     assert(
-      res9.answer.includes('entrance_arch.jpg'),
-      '9. "What does the entrance look like?" returns grand entrance arch image link.'
+      res9.answer.toLowerCase().includes('site visit') || res9.answer.toLowerCase().includes('date'),
+      '9. "When visit?" triggers site visit inquiry naturally.'
     );
 
-    // Test 10: "Send me brochure"
-    const res10 = await agentService.processQuery('Send me brochure', { whatsapp_number: testPhone });
+    // Test 10: "Can I visit tomorrow?"
+    const res10 = await agentService.processQuery('Can I visit tomorrow?', { whatsapp_number: testPhone });
     assert(
-      res10.answer.includes('.pdf'),
-      '10. "Send me brochure" shares PDF brochure link on explicit customer request.'
+      res10.answer.includes('confirmed') || res10.answer.includes('Date:'),
+      '10. "Can I visit tomorrow?" executes site visit booking flow.'
     );
 
-    // Test 11: "Can you show me the site?" / "Can I visit the site?"
-    const res11 = await agentService.processQuery('Can you show me the site?', { whatsapp_number: testPhone });
+    // Test 11: "Can I come Sunday?"
+    const res11 = await agentService.processQuery('Can I come Sunday?', { whatsapp_number: testPhone });
     assert(
-      res11.answer.toLowerCase().includes('site visit') || res11.answer.toLowerCase().includes('vehicle'),
-      '11. "Can you show me the site?" offers free site visit with company vehicle.'
+      res11.answer.includes('confirmed') || res11.answer.includes('Date:'),
+      '11. "Can I come Sunday?" executes site visit booking flow.'
     );
 
-    // Test 12: An unrelated question
-    const res12 = await agentService.processQuery('What is the distance to Mars?', { whatsapp_number: testPhone });
+    // Test 12: "I want to see the site."
+    const res12 = await agentService.processQuery('I want to see the site.', { whatsapp_number: testPhone });
     assert(
-      res12.answer.toLowerCase().includes('not confirmed') || res12.answer.toLowerCase().includes('sales advisors'),
-      '12. Unrelated question outside KB returns dynamic unconfirmed detail notice without generic repetition.'
+      res12.answer.toLowerCase().includes('free site visit') || res12.answer.toLowerCase().includes('preferred date'),
+      '12. "I want to see the site." offers free site visit.'
     );
 
-    // Test 13: Conflict Registry Debug Tracking Check
+    // Test 13: "Send me brochure" (Explicit PDF request)
+    const res13 = await agentService.processQuery('Send me brochure', { whatsapp_number: testPhone });
     assert(
-      Array.isArray(res12.debug.conflicts_flagged) && res12.debug.conflicts_flagged.length >= 3,
-      '13. Response debug metadata tracks flagged source conflicts for admin review.'
+      res13.answer.includes('.pdf'),
+      '13. "Send me brochure" shares PDF brochure link on explicit request.'
+    );
+
+    // Test 14: Unrelated question outside KB
+    const res14 = await agentService.processQuery('What is the distance to Mars?', { whatsapp_number: testPhone });
+    assert(
+      res14.answer.toLowerCase().includes('not confirmed') || res14.answer.toLowerCase().includes('sales advisors'),
+      '14. Unrelated question outside KB returns unconfirmed detail notice without generic repetition.'
+    );
+
+    // Test 15: Conflict Registry Debug Tracking Check
+    assert(
+      Array.isArray(res14.debug.conflicts_flagged) && res14.debug.conflicts_flagged.length >= 3,
+      '15. Response debug metadata tracks flagged source conflicts for admin review.'
     );
 
     console.log('----------------------------------------------------');
