@@ -76,9 +76,10 @@ async function runTests() {
     assert(imgRes && imgRes.answer, 'Incoming IMAGE message normalized and processed gracefully.');
 
     // 6. Proactive Greeting Test
+    const testPhoneGreeting = `+9197777${Math.floor(100000 + Math.random() * 900000)}`;
     const res1 = await agentService.processIncomingWhatsAppMessage({
       whatsapp_message_id: `wamid.hi_${Date.now()}`,
-      whatsapp_number: '+919777766661',
+      whatsapp_number: testPhoneGreeting,
       message: 'Hi',
       customer_name: 'Persona 1'
     });
@@ -124,6 +125,10 @@ async function runTests() {
     // 11. 14-Day Retention Purge Check
     const purgeResult = await retentionService.purgeOldMessages(14);
     assert(purgeResult.success === true, '14-Day conversation retention purge service executes cleanly with active exception protection.');
+
+    // 12. Response Engine Pipeline Fixes Test Suite
+    const testResponseEngineFixes = require('./testResponseEngineFixes');
+    await testResponseEngineFixes();
 
     console.log('---------------------------------------------------');
     console.log(`RESULTS: ${passed}/${total} Phase 3 tests passed.`);

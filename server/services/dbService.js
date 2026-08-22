@@ -112,7 +112,46 @@ class DbService {
         return this.dbData.messages;
       }
       if (sqlUpper.includes('FROM LEADS')) return this.dbData.leads;
-      if (sqlUpper.includes('FROM SITE_VISITS')) return this.dbData.site_visits;
+      if (sqlUpper.includes('FROM SITE_VISITS')) {
+        if (params[0]) {
+          return this.dbData.site_visits.filter((sv) => (sv.customer_id === params[0] || sv.id === params[0]) && sv.status !== 'CANCELLED');
+        }
+        return this.dbData.site_visits;
+      }
+      if (sqlUpper.includes('INSERT INTO SITE_VISITS')) {
+        const record = {
+          id: params[0],
+          customer_id: params[1],
+          whatsapp_number: params[2],
+          customer_name: params[3],
+          date: params[4],
+          time: params[5],
+          pickup_location: params[6],
+          vehicle_required: params[7],
+          status: params[8],
+          google_calendar_event_id: params[9],
+          created_at: params[10],
+          updated_at: params[11]
+        };
+        this.dbData.site_visits.push(record);
+        this.saveJsonDb();
+        return [record];
+      }
+      if (sqlUpper.includes('UPDATE SITE_VISITS')) {
+        if (sqlUpper.includes('SET STATUS =')) {
+          const sv = this.dbData.site_visits.find((s) => s.id === params[1]);
+          if (sv) sv.status = params[0];
+        } else if (sqlUpper.includes('SET DATE =')) {
+          const sv = this.dbData.site_visits.find((s) => s.id === params[3]);
+          if (sv) {
+            sv.date = params[0];
+            sv.time = params[1];
+            sv.status = params[2];
+          }
+        }
+        this.saveJsonDb();
+        return [];
+      }
       if (sqlUpper.includes('FROM CUSTOMERS')) return this.dbData.customers;
       if (sqlUpper.includes('FROM CONVERSATIONS')) return this.dbData.conversations;
       return [];
@@ -132,6 +171,7 @@ class DbService {
         id VARCHAR(64) PRIMARY KEY,
         whatsapp_number VARCHAR(32) UNIQUE NOT NULL,
         customer_name VARCHAR(128),
+        welcomed BOOLEAN DEFAULT FALSE,
         created_at TEXT,
         updated_at TEXT
       );
@@ -241,7 +281,7 @@ class DbService {
     }
   }
 
-  // --- CUSTOMER ORM ---
+  // --- CUSTOMER ORM & WELCOMED STATE MANAGEMENT ---
 
   async findOrCreateCustomer(rawPhone, name = 'Interested Customer') {
     const cleanPhone = this.normalizePhone(rawPhone);
@@ -254,10 +294,10 @@ class DbService {
       if (!customer) {
         const custId = 'cust_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
         await this.query(
-          'INSERT INTO customers (id, whatsapp_number, customer_name, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)',
-          [custId, cleanPhone, name, now, now]
+          'INSERT INTO customers (id, whatsapp_number, customer_name, welcomed, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)',
+          [custId, cleanPhone, name, false, now, now]
         );
-        customer = { id: custId, whatsapp_number: cleanPhone, customer_name: name, created_at: now, updated_at: now };
+        customer = { id: custId, whatsapp_number: cleanPhone, customer_name: name, welcomed: false, created_at: now, updated_at: now };
       } else if (name && name !== 'Interested Customer' && customer.customer_name !== name) {
         await this.query('UPDATE customers SET customer_name = $1, updated_at = $2 WHERE id = $3', [name, now, customer.id]);
         customer.customer_name = name;
@@ -268,7 +308,7 @@ class DbService {
 
       if (!customer) {
         const custId = 'cust_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-        customer = { id: custId, whatsapp_number: cleanPhone, customer_name: name, created_at: now, updated_at: now };
+        customer = { id: custId, whatsapp_number: cleanPhone, customer_name: name, welcomed: false, created_at: now, updated_at: now };
         this.dbData.customers.push(customer);
         this.saveJsonDb();
       } else if (name && name !== 'Interested Customer' && customer.customer_name !== name) {
@@ -278,6 +318,26 @@ class DbService {
       }
       return customer;
     }
+  }
+
+  async isCustomerWelcomed(rawPhone) {
+    const cleanPhone = this.normalizePhone(rawPhone);
+    const customer = await this.findOrCreateCustomer(cleanPhone);
+    return Boolean(customer && customer.welcomed);
+  }
+
+  async markCustomerWelcomed(rawPhone) {
+    const cleanPhone = this.normalizePhone(rawPhone);
+    const customer = await this.findOrCreateCustomer(cleanPhone);
+    customer.welcomed = true;
+
+    if (this.usePostgres && this.pgPool) {
+      await this.query('UPDATE customers SET welcomed = $1, updated_at = $2 WHERE id = $3', [true, new Date().toISOString(), customer.id]);
+    } else {
+      customer.updated_at = new Date().toISOString();
+      this.saveJsonDb();
+    }
+    return true;
   }
 
   // --- CONVERSATION ORM ---

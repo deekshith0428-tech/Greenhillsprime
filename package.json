@@ -8,6 +8,7 @@
     "server": "node server/server.js",
     "client": "npm run dev --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run build --prefix client",
     "test": "node server/tests/runTests.js"
   },
   "keywords": [

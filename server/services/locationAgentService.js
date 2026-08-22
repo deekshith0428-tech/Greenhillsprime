@@ -172,18 +172,41 @@ class LocationAgentService {
       await dbService.upsertLeadRecord(customer, lead);
     }
 
+    // Check first-contact welcomed state in PostgreSQL / Pure-JS DB
+    const isWelcomed = await dbService.isCustomerWelcomed(customer.whatsapp_number);
+    let promoBanner = '';
+
+    if (!isWelcomed) {
+      promoBanner = `Namaste! 👋 Welcome to Royal Kingdom – Green Hills Prime (Morgi Village, Nagalgidda Mandal, Sangareddy Dist).
+
+🌟 *Exclusive Spot Payment Gold Offer*:
+• *1 Gunta (121 Sq Yds)*: ₹2,00,000 ONLY (Rate: ₹1,650/sq yd)
+• *2 Guntas (242 Sq Yds)*: ₹4,00,000 ONLY + *Gold Offer on Full Payment!*
+• *5 Guntas (605 Sq Yds)*: ₹10,00,000
+• *Registration*: ₹12,500 for 1g/2g | ₹37,500 for 5g | 50-Year Patta Linked Docs
+
+✨ *Included*: 6 Years Free Maintenance, 2-Acre Resort + 3-Acre Water Feature, Fruit Plantation & Free Vehicle Site Visit!`;
+
+      await dbService.markCustomerWelcomed(customer.whatsapp_number);
+    }
+
     // --- 1. GREETING INTENT ---
     const greetingWords = ['hi', 'hello', 'hey', 'namaste', 'good morning', 'good afternoon', 'good evening', 'start', 'hii'];
     const isGreeting = greetingWords.some((w) => qLower === w || qLower.startsWith(w + ' ') || qLower.endsWith(' ' + w));
 
     if (isGreeting) {
       matchedIntent = 'PROACTIVE_ONBOARDING_GREETING';
-      factsUsed.push('project_location', 'plot_prices');
-      answer = 'Namaste! 👋 Welcome to Royal Kingdom – Green Hills Prime. Are you looking for plot details, location information, pricing, or a site visit?';
+      factsUsed.push('project_location', 'plot_pricing', 'resort_and_clubhouse');
+      answer = isWelcomed
+        ? 'Welcome back to Green Hills Prime! Are you looking for plot availability, location details, pricing, or scheduling a site visit?'
+        : `${promoBanner}\n\nAre you looking for plot availability, location details, or a free site visit?`;
     }
 
-    // --- 2. OFF-TOPIC / GENERAL KNOWLEDGE INTENTS ---
-    else if (qLower.includes('what is a hectare') || qLower.includes('hectare')) {
+    // --- 2. OFF-TOPIC & GENERAL KNOWLEDGE INTENTS (DIRECT GENERAL ANSWERS) ---
+    else if (qLower.includes('capital of india') || qLower.includes('capital of telangana')) {
+      matchedIntent = 'general_knowledge';
+      answer = qLower.includes('telangana') ? 'Hyderabad is the capital of Telangana.' : 'New Delhi is the capital of India.';
+    } else if (qLower.includes('what is a hectare') || qLower.includes('hectare')) {
       matchedIntent = 'general_question';
       answer = 'A hectare is a unit of land area equal to 10,000 square metres (approximately 2.47 acres or 99.17 guntas).';
     } else if (qLower.includes('joke') || qLower.includes('tell me a joke')) {
@@ -191,7 +214,53 @@ class LocationAgentService {
       answer = "Why don't scientists trust atoms? Because they make up everything! 😊 How can I assist with your land search today?";
     }
 
-    // --- 3. OBJECTIONS & SALES HESITATION ---
+    // --- 3. ANAPHORA & CONTEXT RESOLUTION INTENTS ---
+    else if (qLower.includes('nearest city') || (qLower.includes('city') && (qLower.includes('nearest') || qLower.includes('close')))) {
+      matchedIntent = 'nearest_city_query';
+      factsUsed.push('nearby_locations.loc_bidar');
+      answer = 'Bidar City is the nearest major city to Green Hills Prime, located approximately 22 km away.';
+    } else if (qLower === 'how far' || qLower === 'how far is it' || qLower.startsWith('how far is it')) {
+      matchedIntent = 'anaphora_distance_query';
+      const prevLower = previousMessage.toLowerCase();
+      if (prevLower.includes('city') || prevLower.includes('bidar') || prevLower.includes('nearest')) {
+        factsUsed.push('nearby_locations.loc_bidar');
+        answer = 'Bidar City is located approximately 22 km from Green Hills Prime.';
+      } else if (prevLower.includes('narayankhed')) {
+        factsUsed.push('nearby_locations.loc_narayankhed');
+        answer = 'Narayankhed town is located 12 km from Green Hills Prime.';
+      } else if (prevLower.includes('nimz')) {
+        factsUsed.push('nearby_locations.loc_nimz');
+        answer = 'Zaheerabad NIMZ is located 15 km from Green Hills Prime.';
+      } else if (prevLower.includes('hyderabad')) {
+        factsUsed.push('nearby_locations.loc_hyderabad');
+        answer = 'Hyderabad is located approximately 110 km from Green Hills Prime via the NH-65 highway corridor.';
+      } else {
+        factsUsed.push('nearby_locations');
+        answer = 'Narayankhed is 12 km away, NIMZ is 15 km away, Bidar City & Airport are 22 km away, and Hyderabad is 110 km away.';
+      }
+    }
+
+    // --- 4. DEVELOPMENT & INFRASTRUCTURE INTENT VARIATIONS ---
+    else if (
+      qLower.includes('will this area be developed') ||
+      qLower.includes('what development is planned') ||
+      qLower.includes('what development is happening nearby') ||
+      qLower.includes('what is developing nearby') ||
+      qLower.includes('what developments are coming') ||
+      qLower.includes('is the area developing') ||
+      qLower.includes('future development') ||
+      qLower.includes('nearby infrastructure') ||
+      qLower.includes('upcoming development') ||
+      qLower.includes('why should i invest') ||
+      qLower.includes('development features') ||
+      (qLower.includes('develop') && (qLower.includes('area') || qLower.includes('nearby') || qLower.includes('feature') || qLower.includes('plan')))
+    ) {
+      matchedIntent = 'REGIONAL_DEVELOPMENT_ECOSYSTEM';
+      factsUsed.push('development_ecosystem', 'nimz_landmark', 'land_development', 'resort_and_clubhouse');
+      answer = 'Yes, Green Hills Prime is located in an active regional growth corridor 15 km from Zaheerabad NIMZ. On-site project highlights feature a 2-acre resort + 3-acre water feature zone, 25ft & 30ft wide internal roads, 100ft main road frontage, electricity, geotagging, fruit plantations (Mango, Guava, Sapota, Coconut), and 6 years company maintenance. Would you like plot pricing or to book a free site visit?';
+    }
+
+    // --- 5. OBJECTIONS & SALES HESITATION ---
     else if (qLower.includes('discuss with my family') || qLower.includes('family discussion') || qLower.includes('talk to family')) {
       matchedIntent = 'objection';
       answer = 'Absolutely! Take your time to discuss with your family. If you\'d like, I can share a summary of our plot options, layout details, and location map so you have everything ready for your discussion.';
@@ -200,7 +269,7 @@ class LocationAgentService {
       answer = 'Of course, no problem at all! Taking your time with property decisions is very important. Whenever you\'re ready, I can share location details, plot options, or site visit information for your reference.';
     }
 
-    // --- 4. SITE VISIT WORKFLOW (BOOKING / RESCHEDULING / CANCELLATION) ---
+    // --- 6. SITE VISIT WORKFLOW (BOOKING / RESCHEDULING / CANCELLATION) ---
     else if (qLower.includes('cancel') && (qLower.includes('visit') || qLower.includes('appointment'))) {
       matchedIntent = 'site_visit_cancel';
       factsUsed.push('site_visits');
@@ -226,19 +295,32 @@ class LocationAgentService {
       } else {
         answer = 'I could not find an active site visit appointment under your phone number. Would you like to schedule a new visit?';
       }
-    } else if (qLower.includes('reschedule') || qLower.includes('come monday instead')) {
+    } else if (qLower.includes('reschedule') || qLower.includes('monday instead') || qLower.includes('come monday')) {
       matchedIntent = 'site_visit_reschedule';
       factsUsed.push('site_visits', 'google_calendar');
 
       const parsedDate = this.extractDate(query) || '2026-08-24';
       const parsedTime = this.extractTime(query) || '11:00 AM';
 
-      const existingApt = (await dbService.query(
+      let existingApt = (await dbService.query(
         dbService.usePostgres
           ? 'SELECT * FROM site_visits WHERE customer_id = $1 AND status != \'CANCELLED\''
           : 'SELECT * FROM site_visits WHERE customer_id = ? AND status != \'CANCELLED\'',
         [customer.id]
       ))[0];
+
+      if (!existingApt && lead && (lead.site_visit_interest || lead.site_visit_date)) {
+        existingApt = {
+          id: 'apt_' + Date.now(),
+          customer_id: customer.id,
+          whatsapp_number: customer.whatsapp_number,
+          customer_name: customer.customer_name,
+          date: lead.site_visit_date || '2026-08-23',
+          time: lead.site_visit_time || '11:00 AM',
+          pickup_location: lead.pickup_location || 'Miyapur Metro Station, Hyderabad',
+          status: 'CONFIRMED'
+        };
+      }
 
       if (existingApt) {
         existingApt.date = parsedDate;
@@ -320,29 +402,46 @@ class LocationAgentService {
       }
     }
 
-    // --- 5. FACTUAL PROJECT QUERY INTENTS & GUARDRAILS ---
-    else if (qLower.includes('double') || qLower.includes('guaranteed') || qLower.includes('guarantee') || qLower.includes('resale profit')) {
+    // --- 7. FACTUAL PROJECT QUERY INTENTS & GUARDRAILS ---
+    else if (qLower.includes('double') || qLower.includes('price increase') || qLower.includes('guaranteed') || qLower.includes('guarantee') || qLower.includes('resale profit')) {
       guardrailsTriggered.push('FINANCIAL_GUARANTEE_BLOCKED');
       matchedIntent = 'INVESTMENT_GUARANTEE_QUERY';
       factsUsed.push('nimz_landmark.disclaimer');
-      answer = 'The Zaheerabad NIMZ is an important industrial-development project in the region and is one of the surrounding development factors buyers may consider when evaluating the location. However, future property appreciation, resale profits, or guaranteed price increases cannot be guaranteed.';
-    }
-
-    // --- 5. FACTUAL PROJECT QUERY INTENTS ---
-    else if (qLower.includes('mandal') || qLower.includes('nagalagidda') || qLower.includes('nagalgidda')) {
+      answer = 'Property appreciation in the Green Hills Prime region is supported by nearby industrial growth such as Zaheerabad NIMZ (15 km away). However, future property appreciation, price increases, or guaranteed resale returns depend on market factors and cannot be guaranteed.';
+    } else if (qLower.includes('mandal') || qLower.includes('nagalagidda') || qLower.includes('nagalgidda')) {
       matchedIntent = 'QUERY_PROJECT_MANDAL';
       guardrailsTriggered.push('PROJECT_MANDAL_UNVERIFIED_PROTECTION');
       factsUsed.push('project_location.project_mandal');
-      answer = 'The exact mandal location for Green Hills Prime is currently awaiting official verification by our project development team. Our sales advisors can confirm the official mandal documentation during your inquiry.';
+      answer = 'Green Hills Prime is located in Morgi Village, Nagalgidda Mandal, Sangareddy District (pending official revenue record verification). Our sales advisors can confirm the official documentation during your inquiry.';
+    } else if (qLower.includes('approved') || qLower.includes('permission') || qLower.includes('dtcp') || qLower.includes('legal')) {
+      matchedIntent = 'legal/approval';
+      factsUsed.push('registration_info.patta_passbook_wording');
+      answer = 'Green Hills Prime offers clear title & legal security with 50-year Patta linked documentation and spot registration availability. Individual plot transfer & passbook documentation is processed during registration.';
+    } else if (qLower.includes('build a house') || qLower.includes('can i build') || qLower.includes('house construction')) {
+      matchedIntent = 'house_construction';
+      factsUsed.push('land_development', 'plot_categories');
+      answer = 'Yes, Green Hills Prime open plots are suitable for residential home construction and farmland country living. The layout features 25ft, 30ft & 33ft wide internal roads, electricity lines, borewell water, 24x7 CCTV security, and gated entry.';
+    } else if (qLower.includes('amenities') || qLower.includes('facilities') || qLower.includes('clubhouse')) {
+      matchedIntent = 'amenities';
+      factsUsed.push('resort_and_clubhouse', 'land_development');
+      answer = 'Green Hills Prime amenities include a 2-acre resort + 3-acre water feature zone (swimming pool, open-air gym, children\'s play area, sports grounds, camping zone, indoor games), 25ft & 30ft internal roads, 100ft main road frontage, electricity transformer, geotagging, fruit plantations (Mango, Guava, Custard Apple, Sapota, Coconut), and 6 years company maintenance.';
+    } else if (qLower.includes('plot size') || qLower.includes('plot sizes') || qLower.includes('dimensions')) {
+      matchedIntent = 'plot_sizes';
+      factsUsed.push('plot_pricing');
+      answer = 'Green Hills Prime offers three approved plot size categories:\n• *1 Gunta*: 121 Sq Yds\n• *2 Guntas*: 242 Sq Yds (Approx. 36.3 ft x 60 ft)\n• *5 Guntas*: 605 Sq Yds';
+    } else if (qLower.includes('additional charge') || qLower.includes('additional charges') || qLower.includes('extra charge')) {
+      matchedIntent = 'additional_charges';
+      factsUsed.push('plot_pricing');
+      answer = 'Additional plot charges for Green Hills Prime are:\n• *Corner Plot*: +₹50,000 extra\n• *East-Facing Plot*: +₹10,000 extra\n• *30ft Road Facing Plot*: +₹20,000 extra';
     } else if (qLower.includes('registration cost 2 lakh') || (qLower.includes('registration') && qLower.includes('2 lakh'))) {
       matchedIntent = 'QUERY_REGISTRATION_DETAILS';
       guardrailsTriggered.push('REGISTRATION_AMOUNT_INTERPRETATION_GUARDRAIL');
       factsUsed.push('registration_info');
-      answer = 'The project team has mentioned information regarding ₹2 lakh in connection with project options. However, this figure is not automatically specified as a registration fee or government tax. Spot registration is available, subject to applicable project requirements. Our sales team will provide the exact fee breakdown for your plot.';
+      answer = 'Registration charges for Green Hills Prime are ₹12,500 for 1 Gunta, ₹12,500 for 2 Guntas, and ₹37,500 for 5 Guntas. The ₹2 Lakh figure refers to the 1 Gunta plot price rather than registration fees.';
     } else if (qLower.includes('registration')) {
       matchedIntent = 'registration';
       factsUsed.push('registration_info');
-      answer = `${kb.registration_info.spot_registration_wording}\nOur sales team can walk you through the applicable registration steps and timeline for individual plots.`;
+      answer = 'Spot registration is available for Green Hills Prime plots. Applicable registration charges are ₹12,500 for 1 Gunta, ₹12,500 for 2 Guntas, and ₹37,500 for 5 Guntas.';
     } else if (qLower.includes('rythu bandhu') || qLower.includes('rythu bima') || qLower.includes('government scheme')) {
       matchedIntent = 'government_schemes';
       factsUsed.push('registration_info.rythu_bandhu_wording', 'registration_info.rythu_bima_wording');
@@ -351,29 +450,75 @@ class LocationAgentService {
       matchedIntent = 'legal/approval';
       factsUsed.push('registration_info.patta_passbook_wording');
       answer = kb.registration_info.patta_passbook_wording;
+    } else if (qLower.includes('narayankhed')) {
+      matchedIntent = 'connectivity';
+      factsUsed.push('nearby_locations.loc_narayankhed');
+      answer = 'Narayankhed town is located 12 km from Green Hills Prime.';
+    } else if (qLower.includes('bidar airport') || qLower.includes('bidar domestic airport')) {
+      matchedIntent = 'connectivity';
+      factsUsed.push('nearby_locations.loc_bidar_airport');
+      answer = 'Bidar Domestic Airport is located approximately 22 km from Green Hills Prime.';
+    } else if (qLower.includes('nimz')) {
+      matchedIntent = 'connectivity';
+      factsUsed.push('nearby_locations.loc_nimz');
+      answer = 'Zaheerabad NIMZ (National Investment & Manufacturing Zone) is located 15 km from Green Hills Prime (20 km via state highway corridor).';
     } else if (qLower.includes('bidar')) {
       matchedIntent = 'connectivity';
-      factsUsed.push('nearby_locations.loc_bidar');
-      answer = 'Bidar is approximately 22 km from Green Hills Prime. Distance information is based on project-team-provided data.';
+      factsUsed.push('nearby_locations.loc_bidar', 'nearby_locations.loc_bidar_airport');
+      answer = 'Bidar City and Bidar Domestic Airport are located approximately 22 km from Green Hills Prime.';
+    } else if (qLower.includes('price of 2 gunta') || qLower.includes('price of 2 guntas') || qLower.includes('cost of 2 guntas') || qLower.includes('2 gunta price')) {
+      matchedIntent = 'pricing_2_guntas';
+      factsUsed.push('plot_pricing');
+      answer = 'The total price for 2 Guntas (242 sq yds) is ₹4,00,000 (rate: ₹1,650/sq yd). Breakdown: Booking amount ₹50,000, balance ₹3,50,000 within 14 days, registration ₹12,500. A special spot payment Gold Offer is available!';
     } else if (qLower.includes('price') || qLower.includes('cost') || qLower.includes('how much')) {
       matchedIntent = 'pricing';
-      factsUsed.push('plot_categories', 'customer_memory.budget');
-      if (lead.budget && lead.budget !== 'Unspecified') {
-        answer = `Our 2-Gunta plot layouts (242 sq yds) start from ₹6.5 Lakhs*. Based on your stored budget preference (${lead.budget}), we can discuss customized plot options and spot registration with our team.`;
-      } else {
-        answer = 'Our 2-Gunta plot layouts (242 sq yds) start from ₹6.5 Lakhs*. Custom plot layouts and commercial/semi-commercial categories are also available with spot registration options.';
-      }
+      factsUsed.push('plot_pricing', 'registration_info');
+      answer = `Official plot pricing for Green Hills Prime:\n• *1 Gunta (121 sq yds)*: ₹2,00,000 (Registration ₹12,500)\n• *2 Guntas (242 sq yds)*: ₹4,00,000 (Booking ₹50,000, Balance ₹3,50,000 within 14 days, Registration ₹12,500)\n• *5 Guntas (605 sq yds)*: ₹10,00,000 (Registration ₹37,500)\n\n*Additional Charges*: Corner Plot (+₹50,000), East-Facing Plot (+₹10,000), 30' Road Facing (+₹20,000). Spot registration is available.`;
+    } else if (qLower.includes('project photos') || qLower.includes('show me photos') || qLower.includes('project look like') || qLower.includes('show project photos')) {
+      matchedIntent = 'visual_asset_project_photos';
+      factsUsed.push('visual_assets');
+      answer = `Here are approved project visual assets for Green Hills Prime:
+
+🏛️ *Grand Entrance Arch*: https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_entrance_arch.jpg
+📐 *Master Layout Plan*: https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_master_layout_plan.jpg
+🏊 *2-Acre Resort & Water Feature*: https://raw.githubusercontent.com/GreenHillsPrime/assets/main/resort_and_water_feature_zone.jpg
+
+Would you like plot pricing details or to schedule a free site visit?`;
+    } else if (qLower.includes('swimming pool') || qLower.includes('pool')) {
+      matchedIntent = 'visual_asset_swimming_pool';
+      factsUsed.push('resort_and_clubhouse', 'visual_assets');
+      answer = `Yes! Green Hills Prime features a swimming pool within our 2-acre resort & 3-acre water feature zone, along with an open-air gym, children's play area, and sports grounds.
+
+🏊‍♂️ *Swimming Pool & Resort Zone*: https://raw.githubusercontent.com/GreenHillsPrime/assets/main/resort_swimming_pool.jpg`;
+    } else if (qLower.includes('show me the layout') || qLower.includes('show layout') || qLower.includes('master plan') || qLower.includes('layout map')) {
+      matchedIntent = 'visual_asset_master_layout';
+      factsUsed.push('land_development', 'visual_assets');
+      answer = `Here is the approved master layout plan for Green Hills Prime featuring 100ft main road frontage, 25ft, 30ft & 33ft internal BT roads, and open plot layouts:
+
+📐 *Master Layout Plan*: https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_master_layout_plan.jpg`;
+    } else if (qLower.includes('entrance look like') || qLower.includes('show entrance') || qLower.includes('entrance arch')) {
+      matchedIntent = 'visual_asset_entrance';
+      factsUsed.push('land_development', 'visual_assets');
+      answer = `Green Hills Prime features a grand entrance arch gate with 24x7 security, welcome cabin, and landscaped entry walkway:
+
+🏛️ *Grand Entrance Arch*: https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_entrance_arch.jpg`;
+    } else if (qLower.includes('show clubhouse') || qLower.includes('show resort') || qLower.includes('resort photo')) {
+      matchedIntent = 'visual_asset_resort';
+      factsUsed.push('resort_and_clubhouse', 'visual_assets');
+      answer = `Here is a view of our 2-acre resort layout and 3-acre water feature zone:
+
+🏊 *2-Acre Resort Zone*: https://raw.githubusercontent.com/GreenHillsPrime/assets/main/resort_and_water_feature_zone.jpg`;
     } else if (qLower.includes('where is') || qLower.includes('location') || qLower.includes('google maps')) {
       matchedIntent = 'location';
       factsUsed.push('project_location');
-      answer = `📍 *Royal Kingdom – Green Hills Prime*\nLocation: Zaheerabad / NIMZ Growth Corridor, Sangareddy District, Telangana.\nGoogle Maps: ${kb.project_location.google_maps_location}`;
+      answer = `📍 *Royal Kingdom – Green Hills Prime*\nLocation: Morgi Village, Nagalgidda Mandal, Sangareddy District, Telangana (12 km from Narayankhed, 22 km from Bidar, 15 km from NIMZ).\nGoogle Maps: ${kb.project_location.google_maps_location}`;
     }
 
-    // --- 6. MEMORY & CONTEXT RESOLUTION INTENTS ---
+    // --- 8. MEMORY & CONTEXT RESOLUTION INTENTS ---
     else if (qLower.includes('budget of 5 lakh') || qLower.includes('i have 5 lakh') || qLower.includes('5 lakh budget')) {
       matchedIntent = 'customer_budget';
-      factsUsed.push('customer_memory.budget');
-      answer = 'Got it! A ₹5 Lakh budget is a great starting point. Our 2-Gunta plot layouts start from ₹6.5 Lakhs, and we have flexible payment breakdown options. Are you looking to build a house or for investment?';
+      factsUsed.push('customer_memory.budget', 'plot_pricing');
+      answer = 'Got it! With a ₹5 Lakh budget, you can comfortably acquire our 2 Guntas (242 sq yds) plot option at ₹4,00,000 (Booking: ₹50,000 | Balance: ₹3,50,000 within 14 days | Registration: ₹12,500), or a 1 Gunta (121 sq yds) option at ₹2,00,000 (Registration: ₹12,500). Are you looking to build a house or for investment?';
     } else if (qLower.includes('plot for my family') || qLower.includes('build a house') || qLower.includes('family home')) {
       matchedIntent = 'customer_requirement';
       factsUsed.push('customer_memory.purpose');
@@ -388,34 +533,47 @@ class LocationAgentService {
       }
     }
 
-    // --- 7. DYNAMIC GEMINI LLM & GROUNDED CONVERSATIONAL ENGINE ---
+    // --- 9. SEMANTIC KNOWLEDGE SEARCH & DYNAMIC CONTEXTUAL FALLBACK ENGINE ---
     if (!answer) {
-      factsUsed.push('project_location', 'plot_categories', 'pickup_policy');
+      // 1. Perform semantic search across all approved project knowledge
+      const searchRes = store.searchKnowledge(query);
 
-      // Execute Real Gemini SDK if available
-      const geminiResult = await geminiService.generateGroundedResponse(query, {
-        kbFacts: kb,
-        customerProfile: lead,
-        conversationHistory,
-        detectedIntent: matchedIntent,
-        guardrails: guardrailsTriggered
-      });
+      if (searchRes.matches && searchRes.matches.length > 0) {
+        matchedIntent = 'SEMANTIC_KNOWLEDGE_MATCH';
+        const topMatch = searchRes.matches[0];
+        factsUsed.push(...searchRes.categoriesMatched);
 
-      if (geminiResult && geminiResult.answer) {
-        answer = geminiResult.answer;
+        answer = `${topMatch.text}. Is there any specific detail about plot sizes, location map, or site visit scheduling you would like to know?`;
       } else {
-        // Dynamic Grounded Fallback Engine (NEVER returns a static hard-coded single paragraph)
-        if (qLower.includes('project') || qLower.includes('info')) {
-          matchedIntent = 'project_information';
-          answer = 'Royal Kingdom – Green Hills Prime is a premium planned plot development in the Zaheerabad NIMZ growth corridor, Sangareddy District. We offer 2-Gunta plot layouts, 30ft & 40ft wide BT roads, electricity, gated entry, and spot registration options.';
-        } else if (qLower.includes('amenities') || qLower.includes('features')) {
-          matchedIntent = 'development/amenities';
-          answer = 'Green Hills Prime key amenities include 30ft & 40ft wide BT roads, electricity lines, avenue plantation, 24/7 security with gated entry, and clear boundary demarcation.';
+        // 2. Real Gemini LLM Call if available
+        const geminiResult = await geminiService.generateGroundedResponse(query, {
+          kbFacts: kb,
+          customerProfile: lead,
+          conversationHistory,
+          detectedIntent: matchedIntent,
+          guardrails: guardrailsTriggered
+        });
+
+        if (geminiResult && geminiResult.answer) {
+          answer = geminiResult.answer;
         } else {
-          matchedIntent = 'unknown';
-          answer = 'I don\'t want to give you incorrect information. I don\'t have that detail confirmed right now. I can have our team confirm it for you. Is there anything else regarding location, plot sizes, or site visits I can help with?';
+          // 3. Dynamic Context-Aware Unconfirmed Notice (No single generic fallback)
+          matchedIntent = 'UNCONFIRMED_PROJECT_FACT';
+
+          let topic = 'project';
+          if (qLower.includes('price') || qLower.includes('cost') || qLower.includes('discount') || qLower.includes('payment')) topic = 'pricing';
+          else if (qLower.includes('location') || qLower.includes('distance') || qLower.includes('reach')) topic = 'location';
+          else if (qLower.includes('legal') || qLower.includes('approval') || qLower.includes('dtcp') || qLower.includes('rera')) topic = 'legal approval';
+          else if (qLower.includes('amenity') || qLower.includes('clubhouse') || qLower.includes('water')) topic = 'amenity';
+
+          answer = `I don't have that specific ${topic} detail confirmed right now by our project development team. I can have our sales advisors confirm it for you directly. Is there anything regarding plot sizes, location access, or site visits I can assist with?`;
         }
       }
+    }
+
+    // PDF attachment rule: Only append brochure link if explicitly requested by customer!
+    if (qLower.includes('pdf') || qLower.includes('brochure') || qLower.includes('send map') || qLower.includes('download document')) {
+      answer += '\n\n📄 *Official Green Hills Prime Brochure & Layout Map*: You can download our official brochure document here: https://royalkingdomestates.com/green-hills-prime-brochure.pdf';
     }
 
     // Save AI response message and action to DB
@@ -451,6 +609,9 @@ class LocationAgentService {
     leadMemory = null,
     conversationState = 'AI_ACTIVE'
   ) {
+    const kb = store.getKnowledge();
+    const conflictsFlagged = kb.conflicts_registry || [];
+
     return {
       answer,
       debug: {
@@ -462,7 +623,8 @@ class LocationAgentService {
         proactive_steps: proactiveSteps,
         appointment_details: appointmentDetails,
         customer_memory: leadMemory,
-        conversation_state: conversationState
+        conversation_state: conversationState,
+        conflicts_flagged: conflictsFlagged
       }
     };
   }

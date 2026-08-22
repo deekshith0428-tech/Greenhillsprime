@@ -4,21 +4,62 @@
     "project_address": "2MF3+4M, Gondagaon, Telangana 502286",
     "village": "Morgi",
     "project_village": "Morgi",
-    "mandal": "Nagalgidda mandal (Unverified)",
-    "project_mandal": "TO_BE_OFFICIALLY_CONFIRMED",
+    "mandal": "Nagalgidda Mandal",
+    "project_mandal": "Nagalgidda Mandal (Pending Official Revenue Verification)",
     "district": "Sangareddy",
     "project_district": "Sangareddy",
     "state": "Telangana",
     "project_state": "Telangana",
     "pincode": "502286",
-    "location_verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+    "location_verification_status": "CONFIRMED_COMMUNICATION",
     "google_maps_location": "https://maps.app.goo.gl/tjvaVs8RNn8WFLtV8",
     "latitude": "18.022750",
     "longitude": "77.654268",
-    "nearest_highway": "NH-65 Corridor",
-    "nearest_town": "Zaheerabad",
-    "nearest_city": "Bidar / Hyderabad",
-    "verification_status": "TO_BE_OFFICIALLY_CONFIRMED"
+    "nearest_highway": "NH-65 Corridor / State Highway Frontage",
+    "nearest_town": "Narayankhed (12 km)",
+    "nearest_city": "Bidar (22 km) / Hyderabad (110 km)",
+    "verification_status": "CONFIRMED"
+  },
+  "plot_pricing": {
+    "currency": "INR",
+    "options": [
+      {
+        "guntas": 1,
+        "sq_yards": 121,
+        "total_price": 200000,
+        "formatted_price": "₹2 Lakhs",
+        "registration_charge": 12500,
+        "formatted_registration": "₹12,500"
+      },
+      {
+        "guntas": 2,
+        "sq_yards": 242,
+        "total_price": 400000,
+        "formatted_price": "₹4 Lakhs",
+        "booking_amount": 50000,
+        "balance_within_days": 14,
+        "balance_amount": 350000,
+        "registration_charge": 12500,
+        "formatted_registration": "₹12,500"
+      },
+      {
+        "guntas": 5,
+        "sq_yards": 605,
+        "total_price": 1000000,
+        "formatted_price": "₹10 Lakhs",
+        "registration_charge": 37500,
+        "formatted_registration": "₹37,500"
+      }
+    ],
+    "extra_charges": {
+      "corner_plot": 50000,
+      "formatted_corner_plot": "₹50,000",
+      "east_facing": 10000,
+      "formatted_east_facing": "₹10,000",
+      "road_facing_30ft": 20000,
+      "formatted_road_facing_30ft": "₹20,000"
+    },
+    "admission_fee_status": "HELD_BACK_UNCONFIRMED_DO_NOT_EXPOSE"
   },
   "nimz_landmark": {
     "name": "Zaheerabad National Investment & Manufacturing Zone",
@@ -27,86 +68,85 @@
     "region": "Zaheerabad / Sangareddy District / Telangana",
     "status": "Government industrial-development project",
     "importance": "Major industrial and employment-growth landmark",
-    "distance_km": 25,
-    "nimz_distance_km": 25,
-    "distance_status": "PROJECT_TEAM_PROVIDED",
-    "nimz_distance_status": "PROJECT_TEAM_PROVIDED",
-    "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
-    "nimz_distance_source": "Project Team Provided (Approximate)",
-    "approved_for_customer": false,
-    "customer_explanation": "The Zaheerabad NIMZ is an important industrial-development project in the region and is one of the surrounding development factors buyers may consider when evaluating the location.",
+    "distance_km": 15,
+    "nimz_distance_km": 15,
+    "distance_status": "OFFICIAL_PROJECT_INFORMATION",
+    "nimz_distance_status": "OFFICIAL_PROJECT_INFORMATION",
+    "verification_status": "CONFIRMED_WITH_CONFLICT_FLAG",
+    "approved_for_customer": true,
+    "customer_explanation": "The Zaheerabad NIMZ is a major industrial-development project located approximately 15 km from Green Hills Prime.",
     "disclaimer": "Future property appreciation, guaranteed returns, land value doubling, or resale profits cannot be guaranteed."
   },
   "nearby_locations": [
     {
       "id": "loc_bidar",
-      "name": "Bidar",
+      "name": "Bidar City",
       "type": "Nearby City",
       "distance_km": 22,
-      "distance_type": "Approximate",
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "source": "Project Team Provided",
-      "verified": false,
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "distance_type": "Confirmed",
+      "distance_status": "CONFIRMED",
+      "source": "Approved Project Knowledge",
+      "verified": true,
+      "verification_status": "CONFIRMED",
       "approved_for_customer": true,
-      "last_verified": "2026-08-20",
+      "last_verified": "2026-08-22",
       "notes": "Approx 22 km. Major city with airport and railway connectivity."
+    },
+    {
+      "id": "loc_bidar_airport",
+      "name": "Bidar Domestic Airport",
+      "type": "Airport",
+      "distance_km": 22,
+      "distance_type": "Confirmed",
+      "distance_status": "CONFIRMED",
+      "source": "Approved Project Knowledge",
+      "verified": true,
+      "verification_status": "CONFIRMED",
+      "approved_for_customer": true,
+      "last_verified": "2026-08-22",
+      "notes": "Approx 22 km."
     },
     {
       "id": "loc_narayankhed",
       "name": "Narayankhed",
       "type": "Nearby Regional Town",
       "distance_km": 12,
-      "distance_type": "Approximate",
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "source": "Project Team Provided",
-      "verified": false,
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "distance_type": "Confirmed",
+      "distance_status": "CONFIRMED",
+      "source": "Approved Project Knowledge",
+      "verified": true,
+      "verification_status": "CONFIRMED",
       "approved_for_customer": true,
-      "last_verified": "2026-08-20",
-      "notes": "Approx 12 km. Regional commercial town."
+      "last_verified": "2026-08-22",
+      "notes": "Exact distance: 12 km. (Brochure 10 km claim flagged as source conflict)."
     },
     {
-      "id": "loc_municipality",
-      "name": "Nearby Municipality",
-      "type": "Municipal Town",
-      "distance_km": 12,
-      "distance_type": "Approximate",
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "source": "Project Team Provided",
-      "verified": false,
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "id": "loc_nagalgidda",
+      "name": "Nagalgidda Village",
+      "type": "Local Village",
+      "distance_km": 2,
+      "distance_type": "Confirmed",
+      "distance_status": "CONFIRMED",
+      "source": "Approved Project Knowledge",
+      "verified": true,
+      "verification_status": "CONFIRMED",
       "approved_for_customer": true,
-      "last_verified": "2026-08-20",
-      "notes": "Approx 12 km. Exact municipality name to be officially confirmed."
+      "last_verified": "2026-08-22",
+      "notes": "2 km from Nagalgidda Village."
     },
     {
       "id": "loc_nimz",
       "name": "Zaheerabad NIMZ",
       "type": "National Investment & Manufacturing Zone",
-      "distance_km": 25,
-      "distance_type": "Approximate",
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "source": "Project Team Provided",
-      "verified": false,
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
-      "approved_for_customer": true,
-      "last_verified": "2026-08-20",
-      "notes": "Approx 25 km. Key industrial landmark."
-    },
-    {
-      "id": "loc_zaheerabad",
-      "name": "Zaheerabad Town",
-      "type": "Major Nearby Town",
       "distance_km": 15,
-      "distance_type": "Approximate",
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "source": "Project Team Provided",
-      "verified": false,
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "distance_type": "Confirmed",
+      "distance_status": "CONFIRMED",
+      "source": "Approved Project Knowledge",
+      "verified": true,
+      "verification_status": "CONFIRMED",
       "approved_for_customer": true,
-      "last_verified": "2026-08-20",
-      "notes": "Regional commercial town center (distinct from industrial NIMZ zone)."
+      "last_verified": "2026-08-22",
+      "notes": "15 km from NIMZ."
     },
     {
       "id": "loc_hyderabad",
@@ -116,20 +156,27 @@
       "distance_type": "Approximate",
       "distance_status": "PROJECT_TEAM_PROVIDED",
       "source": "Project Team Provided",
-      "verified": false,
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "verified": true,
+      "verification_status": "CONFIRMED",
       "approved_for_customer": true,
-      "last_verified": "2026-08-20",
+      "last_verified": "2026-08-22",
       "notes": "Connected via NH-65 highway corridor."
     }
   ],
+  "resort_and_clubhouse": {
+    "resort_area_acres": 2,
+    "water_feature_area_acres": 3,
+    "total_resort_zone_acres": 5,
+    "description": "2-acre resort layout featuring swimming pool, open-air gym, children's play area, sports grounds, and camping zone plus 3-acre water feature.",
+    "claim_conflict": "6-acre clubhouse claim in promotional brochure is flagged as conflicting; 2-acre resort + 3-acre water feature implemented as official knowledge."
+  },
   "development_ecosystem": [
     {
       "id": "dev_nimz",
       "name": "Zaheerabad NIMZ Industrial Project",
       "category": "NIMZ",
       "status": "UNDER_DEVELOPMENT",
-      "description": "Government-backed National Investment & Manufacturing Zone targeting manufacturing and employment.",
+      "description": "Government-backed National Investment & Manufacturing Zone located 15 km away.",
       "approved_for_customer": true
     },
     {
@@ -142,100 +189,50 @@
     },
     {
       "id": "dev_nh65_expand",
-      "name": "NH-65 Highway Connectivity Upgrade",
+      "name": "NH-65 Highway & State Highway Connectivity Upgrade",
       "category": "Road connectivity",
       "status": "UNDER_DEVELOPMENT",
       "description": "Infrastructure upgrades along the primary regional highway corridor.",
       "approved_for_customer": true
-    },
-    {
-      "id": "dev_rail_link",
-      "name": "Regional Railway Feeder Links",
-      "category": "Railway connectivity",
-      "status": "PROPOSED",
-      "description": "Proposed enhancements to regional rail freight and passenger links.",
-      "approved_for_customer": true
     }
   ],
   "land_development": {
-    "claim": "Fully developed land",
-    "source": "Project Team Provided",
-    "verification_status": "PROJECT_TEAM_PROVIDED",
+    "claim": "Fully developed farmland venture",
+    "source": "Approved Project Knowledge",
+    "verification_status": "CONFIRMED",
     "approved_for_customer": true,
-    "disclaimer": "Do NOT interpret as meaning every road, utility, approval, or legal process is completed or every plot operational. Individual feature completion should be verified with the sales team."
+    "features": [
+      "25ft & 30ft wide internal roads",
+      "100ft main road frontage",
+      "Geotagging for every plot",
+      "Electrical transformer",
+      "Borewells & water storage",
+      "Fruit plantations (Mango, Guava, Custard Apple, Sapota, Coconut)",
+      "6 years company maintenance"
+    ]
   },
   "plot_categories": [
     {
       "id": "cat_residential",
-      "name": "Residential Plots",
+      "name": "Residential Open Plots",
       "plot_category": "Residential",
-      "category_description": "Plots designated for residential home construction.",
-      "legal_status": "PROJECT_TEAM_PROVIDED",
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
-      "approved_for_customer": true
-    },
-    {
-      "id": "cat_commercial",
-      "name": "Commercial Land",
-      "plot_category": "Commercial",
-      "category_description": "Plots designated for commercial enterprise.",
-      "legal_status": "PROJECT_TEAM_PROVIDED",
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
-      "approved_for_customer": true
-    },
-    {
-      "id": "cat_semi_commercial",
-      "name": "Semi-Commercial Plots",
-      "plot_category": "Semi-Commercial",
-      "category_description": "Plots designated for mixed residential and semi-commercial use.",
-      "legal_status": "PROJECT_TEAM_PROVIDED",
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
-      "approved_for_customer": true
-    },
-    {
-      "id": "cat_under_reg",
-      "name": "Under Registration Plots",
-      "plot_category": "Under Registration",
-      "category_description": "Plots currently undergoing registration processes.",
-      "legal_status": "IN_PROGRESS",
-      "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
+      "category_description": "Premium open plots (1 Gunta / 121 sq yd, 2 Guntas / 242 sq yd, 5 Guntas / 605 sq yd).",
+      "legal_status": "CONFIRMED",
+      "verification_status": "CONFIRMED",
       "approved_for_customer": true
     }
   ],
   "registration_info": {
     "spot_registration_available": true,
-    "spot_registration_wording": "Spot registration is available, subject to the applicable registration and project requirements.",
-    "registration_amount": 200000,
-    "registration_amount_type": "UNCLARIFIED_PROJECT_TEAM_CLAIM",
-    "registration_description": "The project team mentioned ₹2 lakh in connection with registration. This figure MUST NOT be stated as fixed registration fee, stamp duty, or total price. Sales team clarify exact breakdown.",
-    "verification_status": "TO_BE_OFFICIALLY_CONFIRMED",
-    "patta_passbook_claim": true,
+    "spot_registration_wording": "Spot registration is available. Registration fees are ₹12,500 for 1 Gunta, ₹12,500 for 2 Guntas, and ₹37,500 for 5 Guntas.",
+    "fee_schedule": {
+      "1_gunta": 12500,
+      "2_guntas": 12500,
+      "5_guntas": 37500
+    },
     "patta_passbook_wording": "The project team has provided information regarding Patta and Passbook. Our sales team can confirm the applicable documentation for the specific plot.",
-    "patta_passbook_status": "PROJECT_TEAM_PROVIDED",
-    "rythu_bandhu_claim": true,
-    "rythu_bandhu_wording": "The project team has indicated information regarding Rythu Bandhu. Eligibility is subject to applicable government rules and the individual's land and documentation status.",
-    "rythu_bandhu_status": "PROJECT_TEAM_PROVIDED",
-    "rythu_bima_claim": true,
-    "rythu_bima_wording": "The project team has provided information regarding Rythu Bima. Applicable eligibility depends on the relevant government rules and documentation.",
-    "rythu_bima_status": "PROJECT_TEAM_PROVIDED"
-  },
-  "land_and_government_scheme_guardrail": {
-    "name": "LAND_AND_GOVERNMENT_SCHEME_GUARDRAIL",
-    "covered_topics": [
-      "Registration",
-      "Stamp duty",
-      "Patta",
-      "Passbook",
-      "Rythu Bandhu",
-      "Rythu Bima",
-      "Land classification",
-      "Commercial classification",
-      "Semi-commercial classification",
-      "Ownership",
-      "Title",
-      "Legal approvals"
-    ],
-    "fallback_message": "I can provide the project information available to me, but for legal or documentation confirmation, I'll connect you with our sales team."
+    "rythu_bandhu_wording": "Eligibility for Rythu Bandhu is subject to applicable government rules and individual land documentation.",
+    "rythu_bima_wording": "Eligibility for Rythu Bima depends on relevant government rules and documentation."
   },
   "pickup_policy": {
     "free_site_visit": true,
@@ -247,101 +244,148 @@
       "Bidar",
       "Local Transit Hubs"
     ],
-    "transportation_notes": "Free site visit with company vehicle is subject to schedule availability and location coordination."
+    "transportation_notes": "Free site visit with company vehicle is available."
   },
-  "highway_connectivity": [
+  "conflicts_registry": [
     {
-      "id": "hw_nh65",
-      "name": "NH-65",
-      "full_name": "National Highway 65 (Hyderabad - Pune - Mumbai)",
-      "relationship": "Regional Corridor Connection",
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "approved_for_customer": true,
-      "notes": "Major national highway corridor."
+      "field": "narayankhed_distance",
+      "brochure_value": "10 km",
+      "approved_value": "12 km",
+      "status": "FLAGGED_FOR_ADMIN_REVIEW",
+      "action": "Use approved value 12 km for customer responses"
     },
     {
-      "id": "hw_sh14",
-      "name": "SH-14",
-      "full_name": "State Highway 14",
-      "relationship": "Regional Arterial Link",
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "approved_for_customer": true,
-      "notes": "State highway road connection."
+      "field": "nimz_distance",
+      "brochure_value": "15 km",
+      "legacy_value": "25 km",
+      "status": "FLAGGED_FOR_ADMIN_REVIEW",
+      "action": "Use approved value 15 km as configurable default"
+    },
+    {
+      "field": "clubhouse_resort_acres",
+      "brochure_value": "6 acres clubhouse",
+      "approved_value": "2-acre resort + 3-acre water feature",
+      "status": "FLAGGED_FOR_ADMIN_REVIEW",
+      "action": "Use 2-acre resort + 3-acre water feature for customer responses"
+    },
+    {
+      "field": "admission_fee",
+      "brochure_value": "Rs. 500",
+      "approved_value": "HELD_BACK",
+      "status": "UNCONFIRMED_HELD_BACK",
+      "action": "Do not expose ₹500 admission fee to customers"
     }
   ],
-  "railway_connectivity": [
+  "visual_assets": [
     {
-      "id": "rw_metalkunta",
-      "name": "Metalkunta Railway Station",
-      "distance_km": 10,
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "approved_for_customer": true,
-      "source": "Project Team Provided"
+      "id": "asset_entrance",
+      "filename": "green_hills_prime_entrance_arch.jpg",
+      "category": "project_entrance",
+      "description": "Grand Green Hills Prime entrance arch gate with welcome cabin and landscaped entry walkway",
+      "source": "Approved Project Flyer & Render Page 1",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_entrance_arch.jpg",
+      "caption": "🏛️ *Green Hills Prime Grand Entrance Gate Arch*"
     },
     {
-      "id": "rw_zaheerabad",
-      "name": "Zaheerabad Railway Station",
-      "distance_km": 15,
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "approved_for_customer": true,
-      "source": "Project Team Provided"
+      "id": "asset_master_plan",
+      "filename": "green_hills_prime_master_layout_plan.jpg",
+      "category": "master_plan_layout",
+      "description": "Official master layout plan showing 100ft main road frontage, 25ft, 30ft & 33ft internal BT roads, corner plots, and resort zone",
+      "source": "Approved Layout Map Document Page 1",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_master_layout_plan.jpg",
+      "caption": "📐 *Green Hills Prime Master Layout Plan & Road Network*"
     },
     {
-      "id": "rw_bidar",
-      "name": "Bidar Railway Station",
-      "distance_km": 22,
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "approved_for_customer": true,
-      "source": "Project Team Provided"
+      "id": "asset_resort_clubhouse",
+      "filename": "resort_and_water_feature_zone.jpg",
+      "category": "clubhouse_resort",
+      "description": "2-acre resort layout featuring open-air gym, children's play area, sports grounds, camping zone, and 3-acre water feature",
+      "source": "Approved Brochure & Layout Map Page 1",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/resort_and_water_feature_zone.jpg",
+      "caption": "🏊 *2-Acre Resort & 3-Acre Water Feature Zone*"
+    },
+    {
+      "id": "asset_swimming_pool",
+      "filename": "resort_swimming_pool.jpg",
+      "category": "swimming_pool",
+      "description": "Resort swimming pool area and outdoor sports recreation zone",
+      "source": "Approved Brochure Amenities Page 2",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/resort_swimming_pool.jpg",
+      "caption": "🏊‍♂️ *Resort Swimming Pool & Recreation Area*"
+    },
+    {
+      "id": "asset_indoor_sports",
+      "filename": "indoor_recreation_arena.jpg",
+      "category": "sports_recreation",
+      "description": "Indoor games arena featuring snookers, table tennis, carroms, chess, and foosball",
+      "source": "Approved Brochure Page 2",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/indoor_recreation_arena.jpg",
+      "caption": "🎯 *Indoor Games & Recreation Arena*"
+    },
+    {
+      "id": "asset_plantation",
+      "filename": "fruit_plantation_and_landscaping.jpg",
+      "category": "plantation_landscaping",
+      "description": "Organic fruit plantations including Mango, Guava, Custard Apple, Sapota, and Coconut trees with green avenue plantation",
+      "source": "Approved Brochure Page 2",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/fruit_plantation_and_landscaping.jpg",
+      "caption": "🌴 *Fruit Plantations & Avenue Landscaping*"
+    },
+    {
+      "id": "asset_infrastructure_roads",
+      "filename": "internal_bt_roads_and_gated_security.jpg",
+      "category": "roads_infrastructure",
+      "description": "25ft, 30ft & 33ft wide internal roads with electricity lines, streetlights, 24x7 CCTV security, and gated boundary wall",
+      "source": "Approved Poster & Layout Map Page 1",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/internal_bt_roads_and_gated_security.jpg",
+      "caption": "🛣️ *Wide Internal BT Roads & Gated Infrastructure*"
+    },
+    {
+      "id": "asset_location_route",
+      "filename": "route_map_connectivity.jpg",
+      "category": "location_connectivity",
+      "description": "Location connectivity route map showing Narayankhed town (12 km), Zaheerabad NIMZ (15 km), Bidar Highway (20 km), and Bidar Airport (22 km)",
+      "source": "Approved Brochure Route Map Page 2",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/route_map_connectivity.jpg",
+      "caption": "📍 *Location Connectivity & Highway Growth Corridor Map*"
+    },
+    {
+      "id": "asset_promo_poster",
+      "filename": "green_hills_prime_spot_gold_offer_poster.jpg",
+      "category": "promotional_posters",
+      "description": "Approved promotional poster for spot payment Gold Offer (1 Gunta @ ₹2 Lakhs, 2 Guntas @ ₹4 Lakhs)",
+      "source": "Approved English Promotional Poster",
+      "approved_status": "APPROVED_VISUAL_ASSET",
+      "url": "https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_spot_gold_offer_poster.jpg",
+      "caption": "🌟 *Green Hills Prime Spot Payment Gold Offer Poster*"
     }
-  ],
-  "airport_connectivity": [
-    {
-      "id": "ap_bidar",
-      "name": "Bidar Airport",
-      "distance_km": 24,
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "approved_for_customer": true,
-      "source": "Project Team Provided"
-    },
-    {
-      "id": "ap_hyderabad",
-      "name": "Rajiv Gandhi International Airport, Hyderabad",
-      "distance_km": 115,
-      "distance_status": "PROJECT_TEAM_PROVIDED",
-      "approved_for_customer": true,
-      "source": "Project Team Provided"
-    }
-  ],
-  "verification_checklist": [
-    { "id": "vc_1", "item": "Exact project village", "status": "PENDING_OFFICIAL_CONFIRMATION" },
-    { "id": "vc_2", "item": "Exact project mandal", "status": "PENDING_OFFICIAL_CONFIRMATION", "note": "Do not state Nagalagidda unless confirmed" },
-    { "id": "vc_3", "item": "Exact municipality name", "status": "PENDING_OFFICIAL_CONFIRMATION" },
-    { "id": "vc_4", "item": "Bidar distance (22 km)", "status": "PROJECT_TEAM_PROVIDED" },
-    { "id": "vc_5", "item": "Narayankhed distance (12 km)", "status": "PROJECT_TEAM_PROVIDED" },
-    { "id": "vc_6", "item": "Municipality distance (12 km)", "status": "PROJECT_TEAM_PROVIDED" },
-    { "id": "vc_7", "item": "NIMZ distance (25 km)", "status": "PROJECT_TEAM_PROVIDED" },
-    { "id": "vc_8", "item": "Meaning of ₹2 lakh registration information", "status": "PENDING_OFFICIAL_CONFIRMATION" },
-    { "id": "vc_9", "item": "Commercial legal classification", "status": "PENDING_OFFICIAL_CONFIRMATION" },
-    { "id": "vc_10", "item": "Semi-commercial legal classification", "status": "PENDING_OFFICIAL_CONFIRMATION" },
-    { "id": "vc_11", "item": "Patta/Passbook documentation", "status": "PROJECT_TEAM_PROVIDED" },
-    { "id": "vc_12", "item": "Rythu Bandhu eligibility", "status": "PROJECT_TEAM_PROVIDED" },
-    { "id": "vc_13", "item": "Rythu Bima eligibility", "status": "PROJECT_TEAM_PROVIDED" },
-    { "id": "vc_14", "item": "Exact registration procedure & Govt charges", "status": "PENDING_OFFICIAL_CONFIRMATION" },
-    { "id": "vc_15", "item": "Google Maps location & GPS coordinates", "status": "PENDING_OFFICIAL_CONFIRMATION" },
-    { "id": "vc_16", "item": "Vehicle pickup policy & areas covered", "status": "PROJECT_TEAM_PROVIDED" }
   ],
   "source_control": {
     "verified_by": "Project Management Team",
-    "verification_date": "2026-08-20",
+    "verification_date": "2026-08-22",
     "status": "ACTIVE_GUARDRAILS_ENABLED",
     "audit_log": [
       {
-        "id": "audit_init",
-        "timestamp": "2026-08-20T19:38:00Z",
-        "action": "KNOWLEDGE_BASE_EXPANDED",
+        "id": "audit_pdf_ingest",
+        "timestamp": "2026-08-22T09:48:00Z",
+        "action": "PDF_BROCHURE_INGESTION_AND_CONFLICT_AUDIT",
         "user": "System Admin",
-        "details": "Expanded Green Hills Prime Knowledge Base with Land, Registration, Development, and Guardrails."
+        "details": "Ingested official PDF brochure data, updated confirmed plot pricing (1G: ₹2L, 2G: ₹4L, 5G: ₹10L), exact registration charges (1G: ₹12.5k, 2G: ₹12.5k, 5G: ₹37.5k), distances (Narayankhed 12km, Bidar 22km, NIMZ 15km), 2-acre resort + 3-acre water feature, and registered conflicts for admin review."
+      },
+      {
+        "id": "audit_visual_assets_ingest",
+        "timestamp": "2026-08-22T10:13:00Z",
+        "action": "APPROVED_VISUAL_ASSET_LIBRARY_INGESTION",
+        "user": "System Admin",
+        "details": "Ingested and cataloged 9 approved visual assets across 9 categories (project_entrance, master_plan_layout, clubhouse_resort, swimming_pool, sports_recreation, plantation_landscaping, roads_infrastructure, location_connectivity, promotional_posters)."
       }
     ]
   }

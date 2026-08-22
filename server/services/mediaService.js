@@ -19,8 +19,8 @@ class MediaService {
       site_plan_image: {
         type: 'image',
         name: 'Site Layout Plan.jpg',
-        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/Site_Layout_Plan.jpg',
-        caption: '📐 Master Layout Plan & Plot Sizes (2 Guntas, Residential & Commercial)'
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_master_layout_plan.jpg',
+        caption: '📐 Master Layout Plan & Plot Sizes (1 Gunta, 2 Guntas, 5 Guntas)'
       },
       location_map: {
         type: 'location',
@@ -28,7 +28,61 @@ class MediaService {
         latitude: 18.022750,
         longitude: 77.654268,
         url: 'https://maps.app.goo.gl/tjvaVs8RNn8WFLtV8',
-        address: 'Gondagaon / Zaheerabad NIMZ Corridor, Sangareddy District, Telangana 502286'
+        address: 'Morgi Village, Nagalgidda Mandal / Zaheerabad NIMZ Corridor, Sangareddy District, Telangana 502286'
+      },
+      project_entrance: {
+        type: 'image',
+        name: 'green_hills_prime_entrance_arch.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_entrance_arch.jpg',
+        caption: '🏛️ *Green Hills Prime Grand Entrance Gate Arch*'
+      },
+      master_plan_layout: {
+        type: 'image',
+        name: 'green_hills_prime_master_layout_plan.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_master_layout_plan.jpg',
+        caption: '📐 *Green Hills Prime Master Layout Plan & Road Network*'
+      },
+      clubhouse_resort: {
+        type: 'image',
+        name: 'resort_and_water_feature_zone.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/resort_and_water_feature_zone.jpg',
+        caption: '🏊 *2-Acre Resort & 3-Acre Water Feature Zone*'
+      },
+      swimming_pool: {
+        type: 'image',
+        name: 'resort_swimming_pool.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/resort_swimming_pool.jpg',
+        caption: '🏊‍♂️ *Resort Swimming Pool & Recreation Area*'
+      },
+      sports_recreation: {
+        type: 'image',
+        name: 'indoor_recreation_arena.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/indoor_recreation_arena.jpg',
+        caption: '🎯 *Indoor Games & Recreation Arena*'
+      },
+      plantation_landscaping: {
+        type: 'image',
+        name: 'fruit_plantation_and_landscaping.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/fruit_plantation_and_landscaping.jpg',
+        caption: '🌴 *Fruit Plantations & Avenue Landscaping*'
+      },
+      roads_infrastructure: {
+        type: 'image',
+        name: 'internal_bt_roads_and_gated_security.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/internal_bt_roads_and_gated_security.jpg',
+        caption: '🛣️ *Wide Internal BT Roads & Gated Infrastructure*'
+      },
+      location_connectivity: {
+        type: 'image',
+        name: 'route_map_connectivity.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/route_map_connectivity.jpg',
+        caption: '📍 *Location Connectivity & Highway Growth Corridor Map*'
+      },
+      promotional_posters: {
+        type: 'image',
+        name: 'green_hills_prime_spot_gold_offer_poster.jpg',
+        url: 'https://raw.githubusercontent.com/GreenHillsPrime/assets/main/green_hills_prime_spot_gold_offer_poster.jpg',
+        caption: '🌟 *Green Hills Prime Spot Payment Gold Offer Poster*'
       }
     };
   }

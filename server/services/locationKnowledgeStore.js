@@ -297,6 +297,113 @@ class LocationKnowledgeStore {
     return this.saveData();
   }
 
+  searchKnowledge(userQuery) {
+    if (!this.data || !userQuery) return { matches: [], categoriesMatched: [] };
+    const stopWords = new Set(['what', 'which', 'where', 'when', 'how', 'who', 'why', 'color', 'is', 'are', 'the', 'this', 'that', 'with', 'from', 'have', 'has', 'your', 'about', 'some', 'any', 'does', 'distance', 'tell', 'show', 'give', 'many', 'much']);
+    const qLower = userQuery.toLowerCase();
+    const tokens = qLower.split(/\W+/).filter((t) => t.length > 3 && !stopWords.has(t));
+    const matches = [];
+    const categoriesMatched = new Set();
+
+    if (tokens.length === 0) return { matches: [], categoriesMatched: [] };
+
+    // Helper to score text snippet against query tokens and key phrases
+    const scoreSnippet = (text, category, metadata = {}) => {
+      if (!text) return 0;
+      const textLower = String(text).toLowerCase();
+      let score = 0;
+
+      tokens.forEach((token) => {
+        const regex = new RegExp('\\b' + token + '\\b', 'i');
+        if (regex.test(textLower)) score += 2;
+      });
+
+      // Boost specific keyword clusters ONLY if tokens matched the snippet
+      if (score > 0) {
+        if ((qLower.includes('develop') || qLower.includes('infrastructure') || qLower.includes('growth') || qLower.includes('invest') || qLower.includes('feature')) &&
+            (category === 'development_ecosystem' || category === 'nimz_landmark' || category === 'land_development')) {
+          score += 3;
+        }
+        if ((qLower.includes('city') || qLower.includes('town') || qLower.includes('nearby') || qLower.includes('distance') || qLower.includes('far')) &&
+            (category === 'nearby_locations' || category === 'project_location')) {
+          score += 3;
+        }
+        if ((qLower.includes('register') || qLower.includes('patta') || qLower.includes('rythu')) && category === 'registration_info') {
+          score += 3;
+        }
+      }
+
+      if (score > 0) {
+        matches.push({ category, text, score, metadata });
+        categoriesMatched.add(category);
+      }
+      return score;
+    };
+
+    // 1. Development Ecosystem
+    if (Array.isArray(this.data.development_ecosystem)) {
+      this.data.development_ecosystem.forEach((item) => {
+        scoreSnippet(`${item.name} ${item.category} ${item.description}`, 'development_ecosystem', item);
+      });
+    }
+
+    // 2. NIMZ Landmark
+    if (this.data.nimz_landmark) {
+      const nimz = this.data.nimz_landmark;
+      scoreSnippet(`${nimz.name} ${nimz.region} ${nimz.importance} ${nimz.customer_explanation}`, 'nimz_landmark', nimz);
+    }
+
+    // 3. Land Development Features
+    if (this.data.land_development) {
+      scoreSnippet(`${this.data.land_development.claim} 30ft 40ft BT roads electricity lines avenue plantation gated entry`, 'land_development', this.data.land_development);
+    }
+
+    // 4. Nearby Locations
+    if (Array.isArray(this.data.nearby_locations)) {
+      this.data.nearby_locations.forEach((loc) => {
+        scoreSnippet(`${loc.name} ${loc.type} ${loc.distance_km} km ${loc.notes || ''}`, 'nearby_locations', loc);
+      });
+    }
+
+    // 5. Plot Categories & Plot Pricing
+    if (this.data.plot_pricing && Array.isArray(this.data.plot_pricing.options)) {
+      this.data.plot_pricing.options.forEach((opt) => {
+        scoreSnippet(`${opt.guntas} Gunta ${opt.sq_yards} sq yards price ${opt.formatted_price} total ${opt.total_price} registration ${opt.formatted_registration}`, 'plot_pricing', opt);
+      });
+    }
+    if (Array.isArray(this.data.plot_categories)) {
+      this.data.plot_categories.forEach((cat) => {
+        scoreSnippet(`${cat.name} ${cat.plot_category} ${cat.category_description}`, 'plot_categories', cat);
+      });
+    }
+
+    // 6. Resort & Clubhouse
+    if (this.data.resort_and_clubhouse) {
+      const r = this.data.resort_and_clubhouse;
+      scoreSnippet(`Resort ${r.resort_area_acres} acre resort ${r.water_feature_area_acres} acre water feature total ${r.total_resort_zone_acres} acres ${r.description}`, 'resort_and_clubhouse', r);
+    }
+
+    // 7. Registration Info
+    if (this.data.registration_info) {
+      const reg = this.data.registration_info;
+      scoreSnippet(`${reg.spot_registration_wording} ${reg.patta_passbook_wording} ${reg.rythu_bandhu_wording} ${reg.rythu_bima_wording}`, 'registration_info', reg);
+    }
+
+    // 8. Connectivity (Highways, Railways, Airports)
+    if (Array.isArray(this.data.highway_connectivity)) {
+      this.data.highway_connectivity.forEach((hw) => scoreSnippet(`${hw.name} ${hw.full_name} ${hw.relationship}`, 'highway_connectivity', hw));
+    }
+    if (Array.isArray(this.data.railway_connectivity)) {
+      this.data.railway_connectivity.forEach((rw) => scoreSnippet(`${rw.name} ${rw.distance_km} km`, 'railway_connectivity', rw));
+    }
+    if (Array.isArray(this.data.airport_connectivity)) {
+      this.data.airport_connectivity.forEach((ap) => scoreSnippet(`${ap.name} ${ap.distance_km} km`, 'airport_connectivity', ap));
+    }
+
+    matches.sort((a, b) => b.score - a.score);
+    return { matches, categoriesMatched: Array.from(categoriesMatched) };
+  }
+
   getDefaults() {
     return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
   }
