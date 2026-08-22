@@ -7,6 +7,21 @@ const whatsappService = require('./whatsappService');
 const mediaService = require('./mediaService');
 
 class LocationAgentService {
+  normalizeQuery(query) {
+    if (!query) return '';
+    let s = String(query).toLowerCase().replace(/[?,.!]/g, '').trim();
+    // Normalize common spelling typos and singular/plural forms
+    s = s.replace(/\bameneties\b/g, 'amenities');
+    s = s.replace(/\bamenity\b/g, 'amenities');
+    s = s.replace(/\bfacilties\b/g, 'facilities');
+    s = s.replace(/\bfacilites\b/g, 'facilities');
+    s = s.replace(/\bfeature\b/g, 'features');
+    s = s.replace(/\bdevelpmnt\b/g, 'development');
+    s = s.replace(/\bdevlopment\b/g, 'development');
+    s = s.replace(/\binfrastrucutre\b/g, 'infrastructure');
+    return s;
+  }
+
   async processIncomingWhatsAppMessage(rawPayload) {
     let whatsappMessageId = null;
     let rawPhone = null;
@@ -150,13 +165,10 @@ class LocationAgentService {
     // Fetch conversation message history from DB for LLM context
     const conversationHistory = await dbService.getMessages(conversation.id, 10);
     const previousMessage = conversationHistory.length >= 2 ? conversationHistory[conversationHistory.length - 2].content : '';
-
-    // =========================================================================
-    // INTENT CLASSIFICATION & MEMORY EXTRACTION PIPELINE
-    // =========================================================================
+    const normQuery = this.normalizeQuery(query);
 
     // Extract customer budget
-    if (qLower.includes('5 lakh') || qLower.includes('6 lakh') || qLower.includes('7 lakh') || (qLower.includes('budget') && qLower.match(/(\d+\s*lakhs?)/i))) {
+    if (qLower.includes('lakh') || qLower.includes('budget') || qLower.includes('price range') || qLower.includes('cost')) {
       const match = query.match(/(\d+\s*lakhs?)/i);
       lead.budget = match ? `₹${match[0]}` : 'Around ₹5-7 Lakhs';
       lead.interest_level = 'HIGH';
@@ -240,31 +252,46 @@ class LocationAgentService {
       }
     }
 
-    // --- 4. DEVELOPMENT & INFRASTRUCTURE INTENT VARIATIONS ---
+    // --- 4. AMENITIES, FEATURES, FACILITIES & DEVELOPMENT INTENTS ---
     else if (
-      qLower.includes('is that area developed') ||
-      qLower.includes('is the area developed') ||
-      qLower.includes('will this area be developed') ||
-      qLower.includes('will it be developed') ||
-      qLower.includes('what development is there') ||
-      qLower.includes('how is the development') ||
-      qLower.includes('what facilities are developed') ||
-      qLower.includes('how is the development there') ||
-      qLower.includes('what development is planned') ||
-      qLower.includes('what development is happening nearby') ||
-      qLower.includes('what is developing nearby') ||
-      qLower.includes('what developments are coming') ||
-      qLower.includes('is the area developing') ||
-      qLower.includes('future development') ||
-      qLower.includes('nearby infrastructure') ||
-      qLower.includes('upcoming development') ||
-      qLower.includes('why should i invest') ||
-      qLower.includes('development features') ||
-      (qLower.includes('develop') && (qLower.includes('area') || qLower.includes('nearby') || qLower.includes('feature') || qLower.includes('plan') || qLower.includes('there') || qLower.includes('how') || qLower.includes('what')))
+      normQuery === 'features' ||
+      normQuery === 'feature' ||
+      normQuery === 'amenities' ||
+      normQuery === 'amenity' ||
+      normQuery === 'ameneties' ||
+      normQuery === 'facilities' ||
+      normQuery === 'facility' ||
+      normQuery === 'development' ||
+      normQuery === 'developed' ||
+      normQuery === 'infrastructure' ||
+      normQuery.includes('what is developed') ||
+      normQuery.includes('what development') ||
+      normQuery.includes('what facilities') ||
+      normQuery.includes('project features') ||
+      normQuery.includes('project amenities') ||
+      normQuery.includes('is that area developed') ||
+      normQuery.includes('is the area developed') ||
+      normQuery.includes('will this area be developed') ||
+      normQuery.includes('will it be developed') ||
+      normQuery.includes('how is the development') ||
+      normQuery.includes('what facilities are developed') ||
+      normQuery.includes('how is the development there') ||
+      normQuery.includes('is the area developing') ||
+      normQuery.includes('future development') ||
+      normQuery.includes('nearby infrastructure') ||
+      normQuery.includes('upcoming development') ||
+      normQuery.includes('why should i invest') ||
+      normQuery.includes('development features') ||
+      normQuery.includes('amenities') ||
+      normQuery.includes('facilities') ||
+      normQuery.includes('clubhouse') ||
+      normQuery.includes('features') ||
+      normQuery.includes('feature') ||
+      (normQuery.includes('develop') && (normQuery.includes('area') || normQuery.includes('nearby') || normQuery.includes('feature') || normQuery.includes('plan') || normQuery.includes('there') || normQuery.includes('how') || normQuery.includes('what') || normQuery.includes('is')))
     ) {
-      matchedIntent = 'REGIONAL_DEVELOPMENT_ECOSYSTEM';
-      factsUsed.push('land_development', 'development_ecosystem', 'nimz_landmark');
-      answer = 'Green Hills Prime is located in an active regional growth corridor 15 km from Zaheerabad NIMZ. On-site project infrastructure includes 25ft, 30ft & 33ft wide internal BT roads, 100ft main road frontage, electricity transformer & streetlights, borewell water storage, 24x7 CCTV security with gated boundary wall, geotagging, fruit plantations (Mango, Guava, Sapota, Coconut), and 6 years company maintenance. Would you like plot pricing or to book a free site visit?';
+      matchedIntent = 'AMENITIES_AND_DEVELOPMENT';
+      factsUsed.push('land_development', 'resort_and_clubhouse', 'development_ecosystem');
+      answer = 'Green Hills Prime amenities, development features & infrastructure include a 2-acre resort + 3-acre water feature zone (swimming pool, open-air gym, children\'s play area, sports grounds, camping zone, indoor games), 25ft, 30ft & 33ft wide internal BT roads, 100ft main road frontage, electricity transformer & streetlights, borewell water storage, 24x7 CCTV security with gated boundary wall, geotagging, fruit plantations (Mango, Guava, Custard Apple, Sapota, Coconut), and 6 years company maintenance.';
     }
 
     // --- 5. OBJECTIONS & SALES HESITATION ---
@@ -375,7 +402,7 @@ class LocationAgentService {
 
       const hasSpecificDateOrTime = this.extractDate(query) || this.extractTime(query) || qLower.includes('tomorrow') || qLower.includes('sunday') || qLower.includes('monday') || qLower.includes('schedule') || qLower.includes('book');
 
-      if (!hasSpecificDateOrTime && (qLower === 'when visit' || qLower === 'when can i visit' || qLower === 'can i visit' || qLower.includes('want to see') || qLower.includes('show me the place') || (previousMessage.toLowerCase().includes('visit') && qLower.includes('when')))) {
+      if (!hasSpecificDateOrTime && (normQuery.includes('when visit') || normQuery.includes('when can i visit') || normQuery.includes('can i visit') || normQuery.includes('can i come') || normQuery.includes('want to see') || normQuery.includes('show me the place') || (previousMessage.toLowerCase().includes('visit') && normQuery.includes('when')))) {
         answer = 'Yes, you can schedule a free site visit! We provide complimentary company vehicle pickup from Hyderabad. Tell me your preferred date and time, and I will be happy to arrange it for you.';
       } else {
         const parsedDate = this.extractDate(query) || '2026-08-23';

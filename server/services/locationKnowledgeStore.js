@@ -299,9 +299,29 @@ class LocationKnowledgeStore {
 
   searchKnowledge(userQuery) {
     if (!this.data || !userQuery) return { matches: [], categoriesMatched: [] };
-    const stopWords = new Set(['what', 'which', 'where', 'when', 'how', 'who', 'why', 'color', 'is', 'are', 'the', 'this', 'that', 'with', 'from', 'have', 'has', 'your', 'about', 'some', 'any', 'does', 'distance', 'tell', 'show', 'give', 'many', 'much']);
-    const qLower = userQuery.toLowerCase();
-    const tokens = qLower.split(/\W+/).filter((t) => t.length > 3 && !stopWords.has(t));
+    const stopWords = new Set(['what', 'which', 'where', 'when', 'how', 'who', 'why', 'color', 'is', 'are', 'the', 'this', 'that', 'with', 'from', 'have', 'has', 'your', 'about', 'some', 'any', 'does', 'distance', 'tell', 'show', 'give', 'many', 'much', 'there']);
+    
+    // Normalize typos and common spelling variations
+    let qNorm = userQuery.toLowerCase().trim();
+    qNorm = qNorm.replace(/\bameneties\b/g, 'amenities');
+    qNorm = qNorm.replace(/\bamenity\b/g, 'amenities');
+    qNorm = qNorm.replace(/\bfacilties\b/g, 'facilities');
+    qNorm = qNorm.replace(/\bfacilites\b/g, 'facilities');
+    qNorm = qNorm.replace(/\bfeature\b/g, 'features');
+    qNorm = qNorm.replace(/\bdevelpmnt\b/g, 'development');
+    qNorm = qNorm.replace(/\bdevlopment\b/g, 'development');
+    qNorm = qNorm.replace(/\binfrastrucutre\b/g, 'infrastructure');
+
+    const rawTokens = qNorm.split(/\W+/).filter((t) => t.length >= 3 && !stopWords.has(t));
+    const tokens = [];
+    rawTokens.forEach((t) => {
+      tokens.push(t);
+      if (t === 'features') tokens.push('feature');
+      if (t === 'amenities') tokens.push('amenity');
+      if (t === 'facilities') tokens.push('facility');
+      if (t === 'development' || t === 'developed') tokens.push('develop');
+    });
+
     const matches = [];
     const categoriesMatched = new Set();
 
@@ -316,12 +336,14 @@ class LocationKnowledgeStore {
       tokens.forEach((token) => {
         const regex = new RegExp('\\b' + token + '\\b', 'i');
         if (regex.test(textLower)) score += 2;
+        else if (textLower.includes(token)) score += 1;
       });
 
       // Boost specific keyword clusters ONLY if tokens matched the snippet
       if (score > 0) {
-        if ((qLower.includes('develop') || qLower.includes('infrastructure') || qLower.includes('growth') || qLower.includes('invest') || qLower.includes('feature')) &&
-            (category === 'development_ecosystem' || category === 'nimz_landmark' || category === 'land_development')) {
+        const qLower = qNorm;
+        if ((qLower.includes('develop') || qLower.includes('infrastructure') || qLower.includes('growth') || qLower.includes('invest') || qLower.includes('feature') || qLower.includes('amenities') || qLower.includes('facilities')) &&
+            (category === 'development_ecosystem' || category === 'nimz_landmark' || category === 'land_development' || category === 'resort_and_clubhouse')) {
           score += 3;
         }
         if ((qLower.includes('city') || qLower.includes('town') || qLower.includes('nearby') || qLower.includes('distance') || qLower.includes('far')) &&

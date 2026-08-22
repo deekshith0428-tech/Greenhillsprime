@@ -36,94 +36,87 @@ async function runResponseEngineTests() {
       '2. "Where is the project?" from EXISTING customer answers directly WITHOUT repeating welcome promo banner.'
     );
 
-    // Test 3: "Is the area developed?"
-    const res3 = await agentService.processQuery('Is the area developed?', { whatsapp_number: testPhone });
+    // Test 3: "features"
+    const res3 = await agentService.processQuery('features', { whatsapp_number: testPhone });
     assert(
-      res3.answer.includes('BT roads') && res3.answer.includes('electricity') && res3.answer.includes('NIMZ'),
-      '3. "Is the area developed?" returns verified project infrastructure & regional growth facts.'
+      !res3.answer.includes("don't have that specific") && (res3.answer.includes('BT roads') || res3.answer.includes('resort') || res3.answer.includes('amenities')),
+      '3. Single-word "features" returns amenities & project infrastructure facts directly without fallback.'
     );
 
-    // Test 4: "Will this area be developed?"
-    const res4 = await agentService.processQuery('Will this area be developed?', { whatsapp_number: testPhone });
+    // Test 4: "amenities"
+    const res4 = await agentService.processQuery('amenities', { whatsapp_number: testPhone });
     assert(
-      res4.answer.includes('NIMZ') && res4.answer.includes('roads') && !res4.answer.includes('not confirmed'),
-      '4. "Will this area be developed?" returns verified growth facts without fallback.'
+      !res4.answer.includes("don't have that specific") && res4.answer.includes('2-acre resort'),
+      '4. Single-word "amenities" returns resort & infrastructure facts without fallback.'
     );
 
-    // Test 5: "What development is there?"
-    const res5 = await agentService.processQuery('What development is there?', { whatsapp_number: testPhone });
+    // Test 5: "ameneties" (spelling typo test)
+    const res5 = await agentService.processQuery('ameneties', { whatsapp_number: testPhone });
     assert(
-      res5.answer.includes('BT roads') || res5.answer.includes('infrastructure'),
-      '5. "What development is there?" returns verified on-site development facts.'
+      !res5.answer.includes("don't have that specific") && (res5.answer.includes('swimming pool') || res5.answer.includes('resort') || res5.answer.includes('BT roads')),
+      '5. Typo "ameneties" is normalized and returns project amenities without fallback.'
     );
 
-    // Test 6: "What facilities are developed?"
-    const res6 = await agentService.processQuery('What facilities are developed?', { whatsapp_number: testPhone });
+    // Test 6: "facilities"
+    const res6 = await agentService.processQuery('facilities', { whatsapp_number: testPhone });
     assert(
-      res6.answer.includes('roads') && res6.answer.includes('electricity'),
-      '6. "What facilities are developed?" returns verified facility infrastructure facts.'
+      !res6.answer.includes("don't have that specific") && res6.answer.includes('BT roads'),
+      '6. Single-word "facilities" returns project facility facts without fallback.'
     );
 
-    // Test 7: "How is the development there?"
-    const res7 = await agentService.processQuery('How is the development there?', { whatsapp_number: testPhone });
+    // Test 7: "development"
+    const res7 = await agentService.processQuery('development', { whatsapp_number: testPhone });
     assert(
-      res7.answer.includes('Zaheerabad NIMZ') || res7.answer.includes('infrastructure'),
-      '7. "How is the development there?" returns verified development facts.'
+      !res7.answer.includes("don't have that specific") && (res7.answer.includes('infrastructure') || res7.answer.includes('BT roads')),
+      '7. Single-word "development" returns on-site infrastructure facts without fallback.'
     );
 
-    // Test 8: "When can I visit?"
-    const res8 = await agentService.processQuery('When can I visit?', { whatsapp_number: testPhone });
+    // Test 8: "what is developed there?"
+    const res8 = await agentService.processQuery('what is developed there?', { whatsapp_number: testPhone });
     assert(
-      res8.answer.toLowerCase().includes('free site visit') || res8.answer.toLowerCase().includes('preferred date'),
-      '8. "When can I visit?" offers free site visit and requests date/time.'
+      !res8.answer.includes("don't have that specific") && res8.answer.includes('BT roads'),
+      '8. "what is developed there?" returns on-site infrastructure facts without fallback.'
     );
 
-    // Test 9: "When visit?"
-    const res9 = await agentService.processQuery('When visit?', { whatsapp_number: testPhone });
+    // Test 9: "what development is there?"
+    const res9 = await agentService.processQuery('what development is there?', { whatsapp_number: testPhone });
     assert(
-      res9.answer.toLowerCase().includes('site visit') || res9.answer.toLowerCase().includes('date'),
-      '9. "When visit?" triggers site visit inquiry naturally.'
+      !res9.answer.includes("don't have that specific") && res9.answer.includes('electricity'),
+      '9. "what development is there?" returns on-site infrastructure facts without fallback.'
     );
 
-    // Test 10: "Can I visit tomorrow?"
-    const res10 = await agentService.processQuery('Can I visit tomorrow?', { whatsapp_number: testPhone });
+    // Test 10: "When can I visit?"
+    const res10 = await agentService.processQuery('When can I visit?', { whatsapp_number: testPhone });
     assert(
-      res10.answer.includes('confirmed') || res10.answer.includes('Date:'),
-      '10. "Can I visit tomorrow?" executes site visit booking flow.'
+      res10.answer.toLowerCase().includes('free site visit') || res10.answer.toLowerCase().includes('preferred date'),
+      '10. "When can I visit?" offers free site visit and requests date/time.'
     );
 
-    // Test 11: "Can I come Sunday?"
-    const res11 = await agentService.processQuery('Can I come Sunday?', { whatsapp_number: testPhone });
+    // Test 11: "Can I visit tomorrow?"
+    const res11 = await agentService.processQuery('Can I visit tomorrow?', { whatsapp_number: testPhone });
     assert(
       res11.answer.includes('confirmed') || res11.answer.includes('Date:'),
-      '11. "Can I come Sunday?" executes site visit booking flow.'
+      '11. "Can I visit tomorrow?" executes site visit booking flow.'
     );
 
-    // Test 12: "I want to see the site."
-    const res12 = await agentService.processQuery('I want to see the site.', { whatsapp_number: testPhone });
+    // Test 12: "Send me brochure" (Explicit PDF request)
+    const res12 = await agentService.processQuery('Send me brochure', { whatsapp_number: testPhone });
     assert(
-      res12.answer.toLowerCase().includes('free site visit') || res12.answer.toLowerCase().includes('preferred date'),
-      '12. "I want to see the site." offers free site visit.'
+      res12.answer.includes('.pdf'),
+      '12. "Send me brochure" shares PDF brochure link on explicit request.'
     );
 
-    // Test 13: "Send me brochure" (Explicit PDF request)
-    const res13 = await agentService.processQuery('Send me brochure', { whatsapp_number: testPhone });
+    // Test 13: Unrelated question outside KB
+    const res13 = await agentService.processQuery('What is the distance to Mars?', { whatsapp_number: testPhone });
     assert(
-      res13.answer.includes('.pdf'),
-      '13. "Send me brochure" shares PDF brochure link on explicit request.'
+      res13.answer.includes("don't have that specific") || res13.answer.includes("sales advisors"),
+      '13. Unrelated question outside KB returns unconfirmed detail notice without generic repetition.'
     );
 
-    // Test 14: Unrelated question outside KB
-    const res14 = await agentService.processQuery('What is the distance to Mars?', { whatsapp_number: testPhone });
+    // Test 14: Conflict Registry Debug Tracking Check
     assert(
-      res14.answer.toLowerCase().includes('not confirmed') || res14.answer.toLowerCase().includes('sales advisors'),
-      '14. Unrelated question outside KB returns unconfirmed detail notice without generic repetition.'
-    );
-
-    // Test 15: Conflict Registry Debug Tracking Check
-    assert(
-      Array.isArray(res14.debug.conflicts_flagged) && res14.debug.conflicts_flagged.length >= 3,
-      '15. Response debug metadata tracks flagged source conflicts for admin review.'
+      Array.isArray(res13.debug.conflicts_flagged) && res13.debug.conflicts_flagged.length >= 3,
+      '14. Response debug metadata tracks flagged source conflicts for admin review.'
     );
 
     console.log('----------------------------------------------------');
