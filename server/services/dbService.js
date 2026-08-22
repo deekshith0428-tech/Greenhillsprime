@@ -267,6 +267,10 @@ class DbService {
       );
     `;
 
+    const migrateCustomersWelcomed = `
+      ALTER TABLE customers ADD COLUMN IF NOT EXISTS welcomed BOOLEAN NOT NULL DEFAULT FALSE;
+    `;
+
     try {
       await this._rawQuery(createCustomersTable);
       await this._rawQuery(createConversationsTable);
@@ -275,7 +279,8 @@ class DbService {
       await this._rawQuery(createLeadsTable);
       await this._rawQuery(createSiteVisitsTable);
       await this._rawQuery(createAiActionsTable);
-      console.log('[DbService] All 7 production core PostgreSQL tables verified & ready!');
+      await this._rawQuery(migrateCustomersWelcomed);
+      console.log('[DbService] All 7 production core PostgreSQL tables & welcomed schema migration verified & ready!');
     } catch (err) {
       console.error('[DbService PostgreSQL Migration Error]:', err.message);
     }
